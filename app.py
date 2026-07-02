@@ -50,16 +50,6 @@ st.markdown("""
         font-family: monospace;
         margin-bottom: 20px;
     }
-    /* ปรับแต่งการแสดงผลกล่องผลลัพธ์โซเชียล */
-    .target-card {
-        background-color: #111827;
-        border: 1px solid #1F2937;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 15px;
-        display: flex;
-        align-items: center;
-    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -160,7 +150,6 @@ if st.button("⚡ INITIALIZE DEEP SCAN (วิเคราะห์โครง�
                 for name in ai_variants:
                     fb_url = f"[https://www.facebook.com/search/top/?q=](https://www.facebook.com/search/top/?q=){urllib.parse.quote(name)}"
                     
-                    # แบ่งคอลัมน์ย่อยแสดงภาพโลโก้นำหน้า ตามด้วยชื่อลิงก์
                     sub_col1, sub_col2 = st.columns([1, 12])
                     with sub_col1:
                         st.image("[https://img.icons8.com/fluent/48/000000/facebook-new.png](https://img.icons8.com/fluent/48/000000/facebook-new.png)", width=40)
@@ -188,7 +177,6 @@ if st.button("⚡ INITIALIZE DEEP SCAN (วิเคราะห์โครง�
                     
                     sub_col1, sub_col2 = st.columns([1, 12])
                     with sub_col1:
-                        # ใช้โลโก้ X (สีดำเหลี่ยม สไตล์โมเดิร์น)
                         st.image("[https://img.icons8.com/ios-filled/50/FFFFFF/x-logo.png](https://img.icons8.com/ios-filled/50/FFFFFF/x-logo.png)", width=35)
                     with sub_col2:
                         st.markdown(f"<div style='padding-top: 8px;'><b>Intercept X Intel:</b> <code>{name}</code> ➔ <a href='{x_search_url}' target='_blank'>ดักข้อมูลโครงข่าย X ↗️</a></div>", unsafe_allow_html=True)
