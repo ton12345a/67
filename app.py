@@ -66,9 +66,9 @@ def ask_ai_for_variants(first_name, last_name, api_key):
 # ส่วนรับข้อมูลจากผู้ใช้งาน
 col1, col2 = st.columns(2)
 with col1:
-    first_name = st.text_input("ชื่อเป้าหมาย (ภาษาไทย)", placeholder="เช่น อารยา, ชาวี")
+    first_name = st.text_input("ชื่อเป้าหมาย (ภาษาไทย)", placeholder="เช่น อารยา, ศุภชัย")
 with col2:
-    last_name = st.text_input("นามสกุลเป้าหมาย (ภาษาไทย)", placeholder="เช่น บุรมศรี, สมาร์ท")
+    last_name = st.text_input("นามสกุลเป้าหมาย (ภาษาไทย)", placeholder="เช่น ซิกเซเว่น, พิมพสุทธิ์")
 
 if st.button("🧠 สั่งการ AI สแกนหาเป้าหมายแบบจำลองพฤติกรรม", type="primary", use_container_width=True):
     if not openai_key:
