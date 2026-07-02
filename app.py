@@ -66,23 +66,23 @@ with st.sidebar:
     st.write("---")
     st.markdown("<span style='color: #6B7280; font-family: monospace; font-size: 11px;'>SECURE CONNECTION: ACTIVE<br>CORE MODEL: GEMINI-2.5-FLASH</span>", unsafe_allow_html=True)
 
-# ฟังก์ชันดึง AI มาวิเคราะห์และเรียงลำดับตามกฎเหล็ก (ติดกัน -> มีจุด/ขีด -> เดาพฤติกรรม)
+# ฟังก์ชันดึง AI มาวิเคราะห์และเรียงลำดับตามกฎเหล็ก (ตรงตัวติดกันก่อน -> เริ่มมีสัญลักษณ์ -> ผสมยาก)
 def ask_gemini_for_variants(first_name, last_name, api_key):
     try:
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel('gemini-2.5-flash')
         
         prompt = f"""
-        คุณคือระบบจำลอง AI OSINT อัจฉริยะ จงวิเคราะห์ชื่อภาษาไทย: "{first_name}" และนามสกุล: "{last_name}" 
-        แล้วสร้างรายการชื่อผู้ใช้ (Username) ภาษาอังกฤษที่มีความน่าจะเป็นทั้งหมด โดยให้เรียงลำดับชุดข้อมูลใน Array ตามกฎข้อบังคับนี้อย่างเคร่งครัด:
+        คุณคือระบบผู้เชี่ยวชาญด้าน OSINT ระดับสูง จงวิเคราะห์ชื่อภาษาไทย: "{first_name}" และนามสกุล: "{last_name}"
+        แล้วสร้างรายการ "ชื่อผู้ใช้ (Username)" หรือ "ชื่อโปรไฟล์" ภาษาอังกฤษที่คนคนนี้มีแนวโน้มจะนำไปใช้ตั้งบน Social Media มากที่สุด โดยจัดเรียงลำดับใน Array ตามระดับความง่ายไปยากดังนี้:
 
-        1. [ช่วงแรกสุด] ตัวอักษรพิมพ์ติดกันยาวๆ เท่านั้น ห้ามมีจุด (.) ห้ามมีขีดล่าง (_) และห้ามมีตัวเลขเด็ดขาด (เช่น supachaipimsut, pimsutsupachai)
-        2. [ช่วงที่สอง] เริ่มใส่เครื่องหมายคั่นพื้นฐาน เช่น ใส่จุดหรือขีดล่างคั่นระหว่างชื่อและนามสกุลตรงตัว (เช่น supachai.pimsut, supachai_pimsut)
-        3. [ช่วงที่สาม] เริ่มตัดทอนนามสกุลผสมกับเครื่องหมาย (เช่น supachai._pms, supachai.p)
-        4. [ช่วงท้ายสุด] ใส่ชื่อเล่นเดาทางคนไทย ผสมตัวเลข หรืออักขระพิเศษขั้นสูงเท่าที่จะหามาได้ทั้งหมด (เช่น Benz.supachai, supachai2026, suppachai_p)
+        1. [ช่วงแรกสุด - ตรงตัวเป๊ะๆ ติดกัน]: แปลงชื่อและนามสกุลเป็นภาษาอังกฤษตรงตัว (รวมถึงการสะกดตรงตัวที่คนไทยนิยมใช้ได้ทุกรูปแบบ เช่น Araya, Alaiya) แล้วให้พิมพ์ติดกันเป็นพืดตัวเล็กทั้งหมด "ห้ามมีจุด ห้ามมีขีดล่าง ห้ามมีตัวเลขเด็ดขาด" (ตัวอย่างเช่น arayaburomsri, alaiyaburomsri) เอาออกมาให้ครบทุกแบบการสะกดตรงตัวเท่าที่จะเป็นไปได้
+        2. [ช่วงที่สอง - ตรงตัวคั่นสัญลักษณ์]: เริ่มเอาชื่อตรงตัวมาคั่นด้วยเครื่องหมายพื้นฐานจุดหรือขีดล่าง (เช่น araya.buromsri, araya_buromsri)
+        3. [ช่วงที่สาม - เริ่มย่อและผสมซับซ้อน]: นามสกุลเริ่มสั้นลงหรือย่อผสมกับเครื่องหมาย (เช่น araya.bur, araya._brs, arayab)
+        4. [ช่วงท้ายสุด - คาดเดาพฤติกรรม/ตัวเลข]: ใส่ชื่อเล่น, คำสร้อย, ปีเกิด ค.ศ. หรือ พ.ศ. (เช่น Benz.araya, araya2026, araya2569)
 
         จงตอบกลับเป็นรูปแบบ JSON array ของข้อความเท่านั้น ห้ามมีคำอธิบายหรือเครื่องหมายมาร์กดาวน์ใดๆ ทั้งสิ้น ตัวอย่างโครงสร้างผลลัพธ์:
-        ["supachaipimsut", "supachai.pimsut", "supachai._pms", "Benz.supachai", "supachai2026"]
+        ["arayaburomsri", "araya.buromsri", "araya._brs", "araya2026"]
         """
         
         response = model.generate_content(prompt)
@@ -112,9 +112,9 @@ st.markdown("<div class='system-status'>[SYSTEM] READY TO INTEL: กรอกข
 
 col1, col2 = st.columns(2)
 with col1:
-    first_name = st.text_input("TARGET FIRST NAME (ภาษาไทย)", placeholder="เช่น ศุภชัย")
+    first_name = st.text_input("TARGET FIRST NAME (ภาษาไทย)", placeholder="เช่น อารยา")
 with col2:
-    last_name = st.text_input("TARGET LAST NAME (ภาษาไทย)", placeholder="เช่น พิมพสุทธิ์")
+    last_name = st.text_input("TARGET LAST NAME (ภาษาไทย)", placeholder="เช่น บุรมย์ศรี")
 
 # ปุ่มกดรันระบบ
 if st.button("⚡ INITIALIZE DEEP SCAN (วิเคราะห์โครงสร้างชื่อด้วย AI)", type="primary", use_container_width=True):
@@ -127,7 +127,7 @@ if st.button("⚡ INITIALIZE DEEP SCAN (วิเคราะห์โครง�
             ai_variants = ask_gemini_for_variants(first_name, last_name, gemini_key)
             
         if ai_variants:
-            st.markdown(f"### 📊 TARGET ALIASES PREDICTED (คัดกรอง: ติดกัน ➔ เริ่มมีสัญลักษณ์ ➔ คาดเดาพฤติกรรม)")
+            st.markdown(f"### 📊 TARGET ALIASES PREDICTED (คัดกรอง: ตรงตัวพิมพ์ติดกัน ➔ เริ่มมีสัญลักษณ์ ➔ คาดเดาซับซ้อน)")
             
             st.write("---")
             st.markdown("### 🌐 OSINT TARGET PROFILE VISUALIZER (คลังผลลัพธ์พร้อมภาพจำลองและจุดสืบค้น)")
@@ -135,7 +135,7 @@ if st.button("⚡ INITIALIZE DEEP SCAN (วิเคราะห์โครง�
             for index, name in enumerate(ai_variants):
                 clean_name = name.replace(" ", "")
                 
-                # สร้างลิงก์สืบค้น
+                # สร้างลิงก์สืบค้นของแต่ละแพลตฟอร์ม
                 fb_url = f"https://www.facebook.com/search/top/?q={urllib.parse.quote(name)}"
                 ig_url = f"https://www.instagram.com/{clean_name}"
                 x_url = f"https://x.com/search?q={urllib.parse.quote(name)}"
@@ -143,24 +143,25 @@ if st.button("⚡ INITIALIZE DEEP SCAN (วิเคราะห์โครง�
                 card_col1, card_col2 = st.columns([2, 8])
                 
                 with card_col1:
+                    # แสดงภาพอวตารจำลองแล็บระบุตัวตนสไตล์ไซเบอร์เท่ๆ
                     st.image(f"https://api.dicebear.com/7.x/bottts/svg?seed={clean_name}", width=110, caption=f"LEVEL {index+1}")
                 
                 with card_col2:
-                    # วิเคราะห์จำแนกประเภทแสดงสถานะความซับซ้อนของชื่อ
+                    # ตรรกะแยกแยะประเภทเพื่อติดป้ายแสดงสถานะ (Tag) ให้เห็นความแม่นยำของการไล่ระดับชื่อ
                     if "." not in name and "_" not in name and not any(char.isdigit() for char in name):
-                        status_text = "RAW PLAIN STRING (พิมพ์ติดกันช่วงแรก)"
+                        status_text = "EXACT MATCH PLAIN STRING (ตรงตัวเป๊ะๆ พิมพ์ติดกันช่วงแรก)"
                         status_color = "#00F0FF"
                     elif "._" in name or "_." in name or ("." in name and "_" in name):
                         status_text = "ADVANCED SEPARATOR (สัญลักษณ์ผสม เช่นไอจี araya._brs)"
                         status_color = "#FF0055"
                     else:
-                        status_text = "COMPLEX BEHAVIORAL PATTERN (สัญลักษณ์/ตัวเลข/ชื่อเล่นช่วงท้าย)"
+                        status_text = "COMPLEX BEHAVIORAL PATTERN (ผสมชื่อเล่น/สัญลักษณ์/ตัวเลขช่วงท้าย)"
                         status_color = "#FFB700"
                     
                     st.markdown(f"<h4 style='color: {status_color}; margin-bottom: 2px;'>ID: {name}</h4>", unsafe_allow_html=True)
                     st.markdown(f"<span style='color: #6B7280; font-size: 12px;'>PRIORITY LEVEL: {index+1} // {status_text}</span>", unsafe_allow_html=True)
                     
-                    # ลิงก์สืบค้นวางประกบข้างรูปภาพตามคำสั่ง
+                    # ลิงก์สืบค้นวางประกบข้างรูปภาพอย่างเป็นระเบียบตามสั่ง
                     st.markdown(f"""
                     * 🟦 **FACEBOOK TARGET:** [`{name}`] ➔ [เปิดหน้าต่างสืบค้น ↗️]({fb_url})
                     * 📸 **INSTAGRAM HANDLE:** [`@{clean_name}`] ➔ [เปิดหน้าต่างเจาะโปรไฟล์ ↗️]({ig_url})
@@ -169,4 +170,4 @@ if st.button("⚡ INITIALIZE DEEP SCAN (วิเคราะห์โครง�
                 
                 st.markdown("<hr style='border-color: #1F2937; margin: 15px 0;'>", unsafe_allow_html=True)
 
-            st.success("🎯 [COMPLETED] เรียงลำดับโครงสร้างตามเงื่อนไขเสร็จสมบูรณ์ ยื่นส่งงานประกวดได้เลยครับ!")
+            st.success("🎯 [COMPLETED] คัดกรองและเรียงลำดับรอยเท้าดิจิทัลจากตรงตัวเป๊ะไปยากเสร็จสมบูรณ์!")
