@@ -18,12 +18,10 @@ st.set_page_config(
 # ตกแต่ง UI ด้วย CSS ให้เป็นหน้าจอสายลับดาร์กโหมดขั้นสุด
 st.markdown("""
     <style>
-    /* เปลี่ยนสีพื้นหลังหลักและฟอนต์ */
     .stApp {
         background-color: #0B0F19;
         color: #E2E8F0;
     }
-    /* หัวข้อหลักสไตล์หน้าจอแฮกเกอร์/สายลับ */
     .terminal-header {
         font-family: 'Courier New', Courier, monospace;
         font-size: 36px;
@@ -44,7 +42,6 @@ st.markdown("""
         margin-bottom: 35px;
         text-transform: uppercase;
     }
-    /* ปรับแต่งกล่องข้อความข้อมูล */
     .system-status {
         background-color: #111827;
         border-left: 4px solid #00F0FF;
@@ -67,26 +64,26 @@ with st.sidebar:
     gemini_key = st.text_input("ENTER GEMINI API KEY:", type="password", help="กรอกรหัสผ่านเชื่อมต่อโครงข่ายสมองกล Google เพื่อเริ่มระบบสแกน")
     st.markdown("[🔓 คัดลอก API KEY ฟรีที่นี่](https://aistudio.google.com/)")
     st.write("---")
-    st.markdown("<span style='color: #6B7280; font-family: monospace; font-size: 11px;'>SECURE CONNECTION: ACTIVE<br>CORE MODEL: GEMINI-1.5-FLASH</span>", unsafe_allow_html=True)
+    st.markdown("<span style='color: #6B7280; font-family: monospace; font-size: 11px;'>SECURE CONNECTION: ACTIVE<br>CORE MODEL: GEMINI-2.5-FLASH</span>", unsafe_allow_html=True)
 
 # ฟังก์ชันดึง AI มาวิเคราะห์ความน่าจะเป็นของพฤติกรรมการตั้งชื่อ
 def ask_gemini_for_variants(first_name, last_name, api_key):
     try:
         genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        model = genai.GenerativeModel('gemini-2.5-flash')
         
         prompt = f"""
         คุณคือผู้เชี่ยวชาญด้าน OSINT และจิตวิทยาพฤติกรรมมนุษย์บนอินเทอร์เน็ต 
         จงวิเคราะห์ชื่อภาษาไทย: "{first_name}" และนามสกุล: "{last_name}" 
         แล้วสร้างรายการ "ชื่อผู้ใช้ (Username)" หรือ "ชื่อโปรไฟล์" ภาษาอังกฤษที่คนๆ นี้มีแนวโน้มจะนำไปใช้ตั้งใน Facebook, Instagram, และ X (Twitter) 
         โดยคำนึงถึงพฤติกรรมจริงของคนไทย เช่น:
-        1. การสะกดตรงตัวแบบต่างๆ (เช่น Chawee, Chawi)
-        2. การใส่ชื่อเล่นเดาทาง (เช่น นำหน้าด้วย Mew, Mook, Benz, Ice, Tang)
-        3. การย่อนามสกุล (เช่น brs, brm, ch)
-        4. การใช้ตัวอักษรพิเศษและตัวเลขผสม (เช่น araya._brs, chawee.2026, chawi_ch)
+        1. การสะกดตรงตัวแบบต่างๆ (เช่น Supachai, Suppachai)
+        2. การใส่ชื่อเล่นเดาทาง (เช่น นำหน้าด้วย Benz, Boy, Toon, Jack, Ice)
+        3. การย่อนามสกุล (เช่น pms, pims, p)
+        4. การใช้ตัวอักษรพิเศษและตัวเลขผสม (เช่น supachai._pms, supachai.2026, suppachai_pims)
         
         จงตอบกลับเป็นรูปแบบ JSON array ของข้อความเท่านั้น ห้ามมีคำอธิบายหรือเครื่องหมายมาร์กดาวน์ใดๆ ทั้งสิ้น ตัวอย่างผลลัพธ์:
-        ["araya_brs", "Mook.araya", "araya.brm", "chawi_ch", "chawee.2026"]
+        ["supachai_pms", "Benz.supachai", "supachai.pims", "suppachai_p", "supachai.2026"]
         """
         
         response = model.generate_content(prompt)
@@ -108,17 +105,26 @@ def ask_gemini_for_variants(first_name, last_name, api_key):
         return []
         
     except Exception as e:
-        st.error(f"[-] SYSTEM ERROR ACCESSING GEMINI NODE: {str(e)}")
-        return []
+        try:
+            model_backup = genai.GenerativeModel('models/gemini-2.5-flash')
+            response = model_backup.generate_content(prompt)
+            clean_text = response.text.strip()
+            if clean_text.startswith("```json"):
+                clean_text = clean_text.split("```json")[1].split("```")[0].strip()
+            result_data = json.loads(clean_text)
+            return result_data if isinstance(result_data, list) else list(result_data.values())[0]
+        except Exception as backup_err:
+            st.error(f"[-] SYSTEM ERROR ACCESSING GEMINI NODE: {str(backup_err)}")
+            return []
 
 # ฟอร์มรับข้อมูลเป้าหมาย
 st.markdown("<div class='system-status'>[SYSTEM] READY TO INTEL: กรอกข้อมูลเป้าหมายคนไทยเพื่อส่งให้ AI คำนวณรอยเท้าดิจิทัล</div>", unsafe_allow_html=True)
 
 col1, col2 = st.columns(2)
 with col1:
-    first_name = st.text_input("TARGET FIRST NAME (ภาษาไทย)", placeholder="เช่น อารยา")
+    first_name = st.text_input("TARGET FIRST NAME (ภาษาไทย)", placeholder="เช่น ศุภชัย")
 with col2:
-    last_name = st.text_input("TARGET LAST NAME (ภาษาไทย)", placeholder="เช่น บุรมศรี")
+    last_name = st.text_input("TARGET LAST NAME (ภาษาไทย)", placeholder="เช่น พิมพสุทธิ์")
 
 # ปุ่มกดสไตล์ทหาร/สายลับ
 if st.button("⚡ INITIALIZE DEEP SCAN (วิเคราะห์โครงสร้างชื่อด้วย AI)", type="primary", use_container_width=True):
@@ -142,20 +148,20 @@ if st.button("⚡ INITIALIZE DEEP SCAN (วิเคราะห์โครง�
             with tab1:
                 st.markdown("<span style='color: #6B7280;'>// ดึงชุดข้อมูลคำค้นหาที่ AI คาดการณ์เข้าสู่หน้าต่างค้นหาของ Facebook</span>", unsafe_allow_html=True)
                 for name in ai_variants:
-                    fb_url = f"https://www.facebook.com/search/top/?q={urllib.parse.quote(name)}"
+                    fb_url = f"[https://www.facebook.com/search/top/?q=](https://www.facebook.com/search/top/?q=){urllib.parse.quote(name)}"
                     st.markdown(f"▶️ TRACE KEYWORD: `{name}` ➔ [OPEN INTELLIGENCE WINDOW ↗️]({fb_url})")
                     
             with tab2:
                 st.markdown("<span style='color: #6B7280;'>// ตรวจสอบเส้นทางโปรไฟล์ Instagram ด้วยโครงสร้างชื่อและอักขระพิเศษ</span>", unsafe_allow_html=True)
                 for name in ai_variants:
                     clean_name = name.replace(" ", "")
-                    ig_url = f"https://www.instagram.com/{clean_name}"
+                    ig_url = f"[https://www.instagram.com/](https://www.instagram.com/){clean_name}"
                     st.markdown(f"▶️ TARGET IG HANDLE: `@{clean_name}` ➔ [INTERCEPT PROFILE ↗️]({ig_url})")
                     
             with tab3:
                 st.markdown("<span style='color: #6B7280;'>// แกะรอยความเคลื่อนไหว ทวีต และบัญชีที่เกี่ยวข้องบนแพลตฟอร์ม X</span>", unsafe_allow_html=True)
                 for name in ai_variants:
-                    x_search_url = f"https://x.com/search?q={urllib.parse.quote(name)}"
+                    x_search_url = f"[https://x.com/search?q=](https://x.com/search?q=){urllib.parse.quote(name)}"
                     st.markdown(f"▶️ INTERCEPT X KEYWORD: `{name}` ➔ [OPEN OBSERVATION POST ↗️]({x_search_url})")
 
             st.success("🎯 [COMPLETED] ระบบประมวลผลการจำลองพฤติกรรมเสร็จสิ้น นวัตกรรมนี้เปิดให้ใช้งานฟรี 100% ผ่านโครงข่าย Google Gemini API เพื่อสนับสนุนภารกิจสืบสวนและช่วยเหลือสังคมอย่างยั่งยืน")
