@@ -1,40 +1,78 @@
 import streamlit as st
-import itertools
 import urllib.parse
 import json
 
-# ตรวจสอบการติดตั้งโมดูล Google GenAI
+# ตรวจสอบการติดตั้งโมดูล Google GenAI หลังบ้าน
 try:
     import google.generativeai as genai
 except ImportError:
-    st.error("กรุณาเพิ่ม 'google-generativeai' ลงในไฟล์ requirements.txt")
+    st.error("SYSTEM ERROR: 'google-generativeai' package missing in requirements.txt")
 
-# ตั้งค่าหน้าเว็บให้สวยงามสไตล์ Cyber Investigation
-st.set_page_config(page_title="AI-Powered OSINT Target Finder", page_icon="🕵️‍♂️", layout="wide")
+# ตั้งค่าหน้าเว็บสไตล์ระบบปฏิบัติการความมั่นคงปลอดภัยไซเบอร์ (Dark Mode OS)
+st.set_page_config(
+    page_title="NEO-OSINT // CYBER INTELLIGENCE SYSTEM", 
+    page_icon="👁️‍🗨️", 
+    layout="wide"
+)
 
+# ตกแต่ง UI ด้วย CSS ให้เป็นหน้าจอสายลับดาร์กโหมดขั้นสุด
 st.markdown("""
     <style>
-    .main-title { font-size: 32px; font-weight: bold; color: #1E3A8A; text-align: center; margin-bottom: 10px; }
-    .subtitle { font-size: 16px; color: #4B5563; text-align: center; margin-bottom: 30px; }
+    /* เปลี่ยนสีพื้นหลังหลักและฟอนต์ */
+    .stApp {
+        background-color: #0B0F19;
+        color: #E2E8F0;
+    }
+    /* หัวข้อหลักสไตล์หน้าจอแฮกเกอร์/สายลับ */
+    .terminal-header {
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 36px;
+        font-weight: bold;
+        color: #00F0FF;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 5px;
+        text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+    }
+    .terminal-sub {
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 14px;
+        color: #FF0055;
+        text-align: center;
+        letter-spacing: 1px;
+        margin-bottom: 35px;
+        text-transform: uppercase;
+    }
+    /* ปรับแต่งกล่องข้อความข้อมูล */
+    .system-status {
+        background-color: #111827;
+        border-left: 4px solid #00F0FF;
+        padding: 15px;
+        border-radius: 4px;
+        font-family: monospace;
+        margin-bottom: 20px;
+    }
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown("<div class='main-title'>🕵️‍♂️ AI-Powered OSINT Target Finder (Gemini Edition)</div>", unsafe_allow_html=True)
-st.markdown("<div class='subtitle'>ระบบใช้ Google Gemini AI วิเคราะห์แนวโน้มการตั้งชื่อและการย่อนามสกุลเพื่อสืบค้นโซเชียลมีเดีย (ใช้งานฟรี)</div>", unsafe_allow_html=True)
+# หน้าจอหลักของระบบปฏิบัติการ
+st.markdown("<div class='terminal-header'>👁️‍🗨️ CORE-OSINT // TARGET RESOLVER</div>", unsafe_allow_html=True)
+st.markdown("<div class='terminal-sub'>[ CLASSIFIED SYSTEM // DEEP IDENTITY PREDICTION ENGINE ]</div>", unsafe_allow_html=True)
 
-# แถบข้างสำหรับใส่ API Key 
+# แถบควบคุมด้านซ้าย (Control Panel)
 with st.sidebar:
-    st.header("🔑 การตั้งค่าระบบ AI หลังบ้าน")
-    gemini_key = st.text_input("ระบุ Google Gemini API Key ของคุณ", type="password", help="จำเป็นต้องใช้เพื่อให้ Gemini ทำหน้าที่คิดและวิเคราะห์ชื่อผู้ใช้")
-    st.markdown("[👉 คลิกที่นี่เพื่อเอา Gemini API Key ฟรี](https://aistudio.google.com/)")
+    st.markdown("<h3 style='color: #00F0FF; font-family: monospace;'>🎛️ SYSTEM CONTROL</h3>", unsafe_allow_html=True)
+    st.write("---")
+    gemini_key = st.text_input("ENTER GEMINI API KEY:", type="password", help="กรอกรหัสผ่านเชื่อมต่อโครงข่ายสมองกล Google เพื่อเริ่มระบบสแกน")
+    st.markdown("[🔓 คัดลอก API KEY ฟรีที่นี่](https://aistudio.google.com/)")
+    st.write("---")
+    st.markdown("<span style='color: #6B7280; font-family: monospace; font-size: 11px;'>SECURE CONNECTION: ACTIVE<br>CORE MODEL: GEMINI-1.5-FLASH</span>", unsafe_allow_html=True)
 
-# ฟังก์ชันส่งให้ Google Gemini คิดชื่อในรูปแบบต่างๆ
+# ฟังก์ชันดึง AI มาวิเคราะห์ความน่าจะเป็นของพฤติกรรมการตั้งชื่อ
 def ask_gemini_for_variants(first_name, last_name, api_key):
     try:
-        # ตั้งค่าคีย์เชื่อมต่อกับ Google
         genai.configure(api_key=api_key)
-        
-        # เลือกใช้โมเดลระดับท็อปที่ประมวลผลเร็วและแม่นยำ
         model = genai.GenerativeModel('gemini-1.5-flash')
         
         prompt = f"""
@@ -52,9 +90,8 @@ def ask_gemini_for_variants(first_name, last_name, api_key):
         """
         
         response = model.generate_content(prompt)
-        
-        # คลีนข้อมูลกรณีเจอมาร์กดาวน์หุ้ม JSON
         clean_text = response.text.strip()
+        
         if clean_text.startswith("```json"):
             clean_text = clean_text.split("```json")[1].split("```")[0].strip()
         elif clean_text.startswith("```"):
@@ -71,51 +108,54 @@ def ask_gemini_for_variants(first_name, last_name, api_key):
         return []
         
     except Exception as e:
-        st.error(f"❌ เกิดข้อผิดพลาดในการเชื่อมต่อ Gemini AI: {str(e)}")
+        st.error(f"[-] SYSTEM ERROR ACCESSING GEMINI NODE: {str(e)}")
         return []
 
-# ส่วนรับข้อมูลจากผู้ใช้งาน
+# ฟอร์มรับข้อมูลเป้าหมาย
+st.markdown("<div class='system-status'>[SYSTEM] READY TO INTEL: กรอกข้อมูลเป้าหมายคนไทยเพื่อส่งให้ AI คำนวณรอยเท้าดิจิทัล</div>", unsafe_allow_html=True)
+
 col1, col2 = st.columns(2)
 with col1:
-    first_name = st.text_input("ชื่อเป้าหมาย (ภาษาไทย)", placeholder="เช่น อารยา, ชาวี")
+    first_name = st.text_input("TARGET FIRST NAME (ภาษาไทย)", placeholder="เช่น อารยา")
 with col2:
-    last_name = st.text_input("นามสกุลเป้าหมาย (ภาษาไทย)", placeholder="เช่น บุรมศรี, สมาร์ท")
+    last_name = st.text_input("TARGET LAST NAME (ภาษาไทย)", placeholder="เช่น บุรมศรี")
 
-if st.button("🧠 สั่งการ Gemini AI สแกนหาเป้าหมาย", type="primary", use_container_width=True):
+# ปุ่มกดสไตล์ทหาร/สายลับ
+if st.button("⚡ INITIALIZE DEEP SCAN (วิเคราะห์โครงสร้างชื่อด้วย AI)", type="primary", use_container_width=True):
     if not gemini_key:
-        st.error("⚠️ กรุณากรอก Gemini API Key ที่แถบด้านซ้ายก่อนใช้งานระบบ")
+        st.error("[-] REJECTED: จำเป็นต้องกรอก GEMINI API KEY ที่แผงควบคุมด้านซ้ายก่อนรันระบบ")
     elif not first_name:
-        st.warning("⚠️ กรุณาระบุชื่อเป้าหมายอย่างน้อยหนึ่งชื่อ")
+        st.warning("[-] WARNING: ระบุชื่อเป้าหมายอย่างน้อยหนึ่งรายการ")
     else:
-        with st.spinner("🤖 Google Gemini กำลังจำลองแนวคิดและสุ่มพฤติกรรมการตั้งชื่อของผู้ใช้..."):
+        with st.spinner("🔄 CONNECTING TO GOOGLE AI NODE... ANALYZING BEHAVIOR PATTERNS..."):
             ai_variants = ask_gemini_for_variants(first_name, last_name, gemini_key)
             
         if ai_variants:
-            st.subheader(f"📋 ผลลัพธ์คาดการณ์พฤติกรรมโดย Gemini AI ({len(ai_variants)} รูปแบบที่น่าจะเป็นที่สุด)")
-            st.write(", ".join([f"**{v}**" for v in ai_variants]))
+            st.markdown(f"### 📊 TARGET ALIASES PREDICTED ({len(ai_variants)} ITEMS)")
+            st.info(", ".join([f"**{v}**" for v in ai_variants]))
             
-            st.divider()
+            st.write("---")
+            st.markdown("### 🌐 OSINT EXPLOIT PATHWAYS (ช่องทางแกะรอยเชิงลึก)")
             
-            st.subheader("🌐 ช่องทางการเชื่อมโยงสืบค้นเชิงลึก (AI-Generated OSINT Targets)")
-            tab1, tab2, tab3 = st.tabs(["Facebook Search Engine", "Instagram Profile Link", "X (Twitter) Intelligence"])
+            tab1, tab2, tab3 = st.tabs(["[💻 FACEBOOK SCAN]", "[📸 INSTAGRAM TRACK]", "[🐦 X INTELLIGENCE]"])
             
             with tab1:
-                st.info("💡 ค้นหาบน Facebook ดึงข้อมูลจากคีย์เวิร์ดที่ผสมผสานโดย AI")
+                st.markdown("<span style='color: #6B7280;'>// ดึงชุดข้อมูลคำค้นหาที่ AI คาดการณ์เข้าสู่หน้าต่างค้นหาของ Facebook</span>", unsafe_allow_html=True)
                 for name in ai_variants:
                     fb_url = f"https://www.facebook.com/search/top/?q={urllib.parse.quote(name)}"
-                    st.markdown(f"🔹 Target Alias: **{name}** -> [ค้นหาบน Facebook ↗️]({fb_url})")
+                    st.markdown(f"▶️ TRACE KEYWORD: `{name}` ➔ [OPEN INTELLIGENCE WINDOW ↗️]({fb_url})")
                     
             with tab2:
-                st.info("💡 ค้นหาบน IG ตรวจสอบโครงสร้างชื่อที่ใช้สัญลักษณ์พิเศษตามที่ AI จำลอง")
+                st.markdown("<span style='color: #6B7280;'>// ตรวจสอบเส้นทางโปรไฟล์ Instagram ด้วยโครงสร้างชื่อและอักขระพิเศษ</span>", unsafe_allow_html=True)
                 for name in ai_variants:
                     clean_name = name.replace(" ", "")
                     ig_url = f"https://www.instagram.com/{clean_name}"
-                    st.markdown(f"📸 IG Handle: **@{clean_name}** -> [สแกนโปรไฟล์ Instagram ↗️]({ig_url})")
+                    st.markdown(f"▶️ TARGET IG HANDLE: `@{clean_name}` ➔ [INTERCEPT PROFILE ↗️]({ig_url})")
                     
             with tab3:
-                st.info("💡 ค้นหาบน X ทั้งในรูปแบบของทวีตและชื่อบัญชีผู้ใช้")
+                st.markdown("<span style='color: #6B7280;'>// แกะรอยความเคลื่อนไหว ทวีต และบัญชีที่เกี่ยวข้องบนแพลตฟอร์ม X</span>", unsafe_allow_html=True)
                 for name in ai_variants:
                     x_search_url = f"https://x.com/search?q={urllib.parse.quote(name)}"
-                    st.markdown(f"🐦 X Keyword: **{name}** -> [แกะรอยบน X (Twitter) ↗️]({x_search_url})")
-                    
-         st.success("🎯 **กลยุทธ์การส่งประกวด:** ระบบนี้เปลี่ยนมาขับเคลื่อนด้วย Google Gemini API (Free Tier) ช่วยให้โปรเจกต์รันได้ฟรี 100% ตอบโจทย์นวัตกรรมเพื่อสังคมที่เข้าถึงง่ายและไม่มีค่าใช้จ่ายแอบแฝง!")
+                    st.markdown(f"▶️ INTERCEPT X KEYWORD: `{name}` ➔ [OPEN OBSERVATION POST ↗️]({x_search_url})")
+
+            st.success("🎯 [COMPLETED] ระบบประมวลผลการจำลองพฤติกรรมเสร็จสิ้น นวัตกรรมนี้เปิดให้ใช้งานฟรี 100% ผ่านโครงข่าย Google Gemini API เพื่อสนับสนุนภารกิจสืบสวนและช่วยเหลือสังคมอย่างยั่งยืน")
