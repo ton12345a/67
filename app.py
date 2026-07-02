@@ -141,45 +141,30 @@ if st.button("⚡ INITIALIZE DEEP SCAN (วิเคราะห์โครง�
             st.info(", ".join([f"**{v}**" for v in ai_variants]))
             
             st.write("---")
-            st.markdown("### 🌐 OSINT EXPLOIT PATHWAYS (ช่องทางแกะรอยเชิงลึกพร้อมข้อมูลภาพแบรนด์)")
+            st.markdown("### 🌐 OSINT EXPLOIT PATHWAYS (ช่องทางแกะรอยเชิงลึกจำแนกคลังเป้าหมาย)")
             
             tab1, tab2, tab3 = st.tabs(["[💻 FACEBOOK SCAN]", "[📸 INSTAGRAM TRACK]", "[🐦 X INTELLIGENCE]"])
             
             with tab1:
-                st.markdown("<span style='color: #6B7280;'>// แสดงภาพเป้าหมายการค้นหาบัญชี Facebook</span>", unsafe_allow_html=True)
+                st.markdown("<span style='color: #6B7280;'>// แสดงรายชื่อเป้าหมายการค้นหาบัญชี Facebook</span>", unsafe_allow_html=True)
                 for name in ai_variants:
                     fb_url = f"[https://www.facebook.com/search/top/?q=](https://www.facebook.com/search/top/?q=){urllib.parse.quote(name)}"
-                    
-                    sub_col1, sub_col2 = st.columns([1, 12])
-                    with sub_col1:
-                        st.image("[https://img.icons8.com/fluent/48/000000/facebook-new.png](https://img.icons8.com/fluent/48/000000/facebook-new.png)", width=40)
-                    with sub_col2:
-                        st.markdown(f"<div style='padding-top: 10px;'><b>Target Alias:</b> <code>{name}</code> ➔ <a href='{fb_url}' target='_blank'>เปิดจุดสืบค้น Facebook ↗️</a></div>", unsafe_allow_html=True)
+                    st.markdown(f"🔹 **[ 🟦 FACEBOOK ]** ➔ `{name}` ➔ [เปิดจุดสืบค้น ↗️]({fb_url})")
                     st.markdown("<hr style='border-color: #1F2937; margin: 5px 0;'>", unsafe_allow_html=True)
                     
             with tab2:
-                st.markdown("<span style='color: #6B7280;'>// แสดงภาพเป้าหมายบัญชีผู้ใช้ในระบบ Instagram</span>", unsafe_allow_html=True)
+                st.markdown("<span style='color: #6B7280;'>// แสดงรายชื่อเป้าหมายบัญชีผู้ใช้ในระบบ Instagram</span>", unsafe_allow_html=True)
                 for name in ai_variants:
                     clean_name = name.replace(" ", "")
                     ig_url = f"[https://www.instagram.com/](https://www.instagram.com/){clean_name}"
-                    
-                    sub_col1, sub_col2 = st.columns([1, 12])
-                    with sub_col1:
-                        st.image("[https://img.icons8.com/fluent/48/000000/instagram-new.png](https://img.icons8.com/fluent/48/000000/instagram-new.png)", width=40)
-                    with sub_col2:
-                        st.markdown(f"<div style='padding-top: 10px;'><b>Instagram Handle:</b> <code>@{clean_name}</code> ➔ <a href='{ig_url}' target='_blank'>เจาะโปรไฟล์ Instagram ↗️</a></div>", unsafe_allow_html=True)
+                    st.markdown(f"🔹 **[ 📸 INSTAGRAM ]** ➔ `@{clean_name}` ➔ [เจาะโปรไฟล์ ↗️]({ig_url})")
                     st.markdown("<hr style='border-color: #1F2937; margin: 5px 0;'>", unsafe_allow_html=True)
                     
             with tab3:
-                st.markdown("<span style='color: #6B7280;'>// แสดงภาพเป้าหมายการดักรับข้อมูลบนเครือข่าย X (Twitter)</span>", unsafe_allow_html=True)
+                st.markdown("<span style='color: #6B7280;'>// แสดงรายชื่อเป้าหมายการดักรับข้อมูลบนเครือข่าย X (Twitter)</span>", unsafe_allow_html=True)
                 for name in ai_variants:
                     x_search_url = f"[https://x.com/search?q=](https://x.com/search?q=){urllib.parse.quote(name)}"
-                    
-                    sub_col1, sub_col2 = st.columns([1, 12])
-                    with sub_col1:
-                        st.image("[https://img.icons8.com/ios-filled/50/FFFFFF/x-logo.png](https://img.icons8.com/ios-filled/50/FFFFFF/x-logo.png)", width=35)
-                    with sub_col2:
-                        st.markdown(f"<div style='padding-top: 8px;'><b>Intercept X Intel:</b> <code>{name}</code> ➔ <a href='{x_search_url}' target='_blank'>ดักข้อมูลโครงข่าย X ↗️</a></div>", unsafe_allow_html=True)
+                    st.markdown(f"🔹 **[ 🐦 X TWITTER ]** ➔ `{name}` ➔ [ดักข้อมูลโครงข่าย ↗️]({x_search_url})")
                     st.markdown("<hr style='border-color: #1F2937; margin: 5px 0;'>", unsafe_allow_html=True)
 
-            st.success("🎯 [COMPLETED] ระบบประมวลผลการจำลองพฤติกรรมและดึงข้อมูลสื่อภาพไอคอนเสร็จสิ้น นวัตกรรมนี้รันบนโครงข่าย Google Gemini API ฟรี 100% พร้อมสำหรับการนำเสนอผลงานเชิงลึก")
+            st.success("🎯 [COMPLETED] ระบบประมวลผลการจำลองพฤติกรรมเสร็จสิ้น นวัตกรรมนี้รันบนโครงข่าย Google Gemini API ฟรี 100% พร้อมสำหรับการนำเสนอผลงานเชิงลึก")
