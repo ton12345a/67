@@ -124,8 +124,8 @@ with st.sidebar:
 st.markdown("<div class='system-status'>🛸 <b>[TARGET MATRIX PROFILE]</b> ระบบสืบหา แพปลา แร่นาง มาวินชอบชินบิ</div>", unsafe_allow_html=True)
 
 col_fn, col_ln = st.columns(2)
-with col_fn: first_name = st.text_input("🛸 ชื่อจริงเป้าหมาย (First name / Name)", placeholder="กรอกชื่อจริงภาษาไทย หรือ ภาษาอังกฤษ")
-with col_ln: last_name = st.text_input("💥 นามสกุลเป้าหมาย (Last name / Surname)", placeholder="กรอกนามสกุลภาษาไทย หรือ ภาษาอังกฤษ")
+with col_fn: first_name = st.text_input("🛸 ชื่อจริงเป้าหมาย (First name / Name)", placeholder="พี่มุก อารยา")
+with col_ln: last_name = st.text_input("💥 นามสกุลเป้าหมาย (Last name / Surname)", placeholder="พี่มุกอารยา สุดสวย")
 
 # 📸 ระบบอัพโหลดภาพใบหน้าเป้าหมาย
 st.markdown("<h4 style='color: #00F0FF;'>📸 คลังโครงข่ายเศษซากใบหน้าดิจิทัล (Facial Stream Node)</h4>", unsafe_allow_html=True)
