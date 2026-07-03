@@ -5,132 +5,140 @@ import time
 import json
 from concurrent.futures import ThreadPoolExecutor
 
-# 1. หน้าจอ Interface สไตล์ดาร์กโหมดขั้นสุด (Cyberpunk Overload Interface)
-st.set_page_config(page_title="NEXUS-OSINT ULTRA", page_icon="👁️‍🗨️", layout="wide")
+# 1. หน้าจอ Interface สไตล์ดาร์กโหมดขั้นสุด (Cyberpunk Overload Interface v5)
+st.set_page_config(page_title="NEXUS-OSINT ULTRA MAX", page_icon="👁️‍🗨️", layout="wide")
 
-# สาด CSS Animation บังคับขยับทุกอิレเมนต์บนหน้าจอ
+# สาด CSS Animation บังคับขยับและเรืองแสงทุกๆ ตารางนิ้วบนหน้าจอ
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap');
     
-    /* 🛸 พื้นหลังและฟอนต์หลักแบบ Matrix */
-    .stApp { background-color: #030712; color: #F1F5F9; font-family: 'Fira Code', monospace; }
+    /* 🛸 พื้นหลังห้วงอวกาศ Matrix ดาร์กโหมดขั้นสุด */
+    .stApp { background-color: #02040a; color: #F1F5F9; font-family: 'Fira Code', monospace; }
     
-    /* --- 🌌 ZONE: ANIMATION DEFINITIONS --- */
+    /* --- 🌌 ZONE: MAXIMUM ANIMATIONS --- */
     @keyframes neonGlow {
-        0%, 100% { text-shadow: 0 0 10px #00F0FF, 0 0 20px #00F0FF, 0 0 30px #00F0FF; color: #00F0FF; }
-        50% { text-shadow: 0 0 4px #00F0FF, 0 0 10px #00F0FF; color: #E0F2FE; opacity: 0.9; }
+        0%, 100% { text-shadow: 0 0 12px #00F0FF, 0 0 25px #00F0FF, 0 0 35px #00F0FF; color: #00F0FF; }
+        50% { text-shadow: 0 0 4px #00F0FF, 0 0 12px #38BDF8; color: #FFFFFF; opacity: 0.9; }
     }
     @keyframes floatCard {
-        0%, 100% { transform: translateY(0px) scale(1); box-shadow: 0 5px 15px rgba(0, 240, 255, 0.1); }
-        50% { transform: translateY(-8px) scale(1.01); box-shadow: 0 15px 30px rgba(0, 240, 255, 0.3); border-color: #00F0FF; }
+        0%, 100% { transform: translateY(0px) rotate(0deg); box-shadow: 0 5px 15px rgba(0, 240, 255, 0.1); }
+        50% { transform: translateY(-10px) rotate(0.5deg); box-shadow: 0 20px 35px rgba(0, 240, 255, 0.35); border-color: #00F0FF; }
     }
     @keyframes borderPulse {
-        0%, 100% { border-color: #1E293B; box-shadow: 0 0 0px transparent; }
-        50% { border-color: #38BDF8; box-shadow: 0 0 12px rgba(56, 189, 248, 0.4); }
+        0%, 100% { border-color: #1E293B; box-shadow: inset 0 0 0px transparent, 0 0 5px rgba(0, 240, 255, 0.1); }
+        50% { border-color: #00F0FF; box-shadow: inset 0 0 15px rgba(0, 240, 255, 0.2), 0 0 20px rgba(0, 240, 255, 0.4); }
     }
     @keyframes textFlicker {
-        0%, 100% { opacity: 1; }
+        0%, 100% { opacity: 1; filter: drop-shadow(0 0 8px #FF007F); }
         23% { opacity: 1; }
-        24% { opacity: 0.2; }
-        26% { opacity: 0.2; }
-        27% { opacity: 1; }
+        24% { opacity: 0.3; filter: none; }
+        26% { opacity: 0.3; }
+        27% { opacity: 1; filter: drop-shadow(0 0 8px #FF007F); }
         80% { opacity: 1; }
-        81% { opacity: 0.5; }
-        83% { opacity: 0.5; }
+        81% { opacity: 0.6; }
+        83% { opacity: 0.6; }
         84% { opacity: 1; }
     }
     @keyframes shimmers {
         0% { background-position: -200% 0; }
         100% { background-position: 200% 0; }
     }
-    @keyframes iconJiggle {
-        0%, 100% { transform: rotate(0deg); }
-        25% { transform: rotate(3deg); }
-        75% { transform: rotate(-3deg); }
+    @keyframes fluidRGB {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    @keyframes iconSpin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
     }
 
     /* --- 🎛️ ZONE: ELEMENTS STYLING --- */
     .terminal-header { 
-        font-size: 36px; font-weight: bold; text-align: center;
+        font-size: 38px; font-weight: bold; text-align: center;
         animation: neonGlow 2s infinite ease-in-out; margin-bottom: 5px;
     }
     
+    /* กล่องข้อความสัญญานสถานะที่สั่งแก้ไขข้อความใหม่ */
     .system-status { 
-        background: linear-gradient(90deg, #0f172a, #1e1b4b); border: 1px solid #334155; 
-        border-left: 6px solid #00F0FF; padding: 18px; margin-bottom: 25px; border-radius: 8px;
-        animation: borderPulse 3s infinite ease-in-out;
+        background: linear-gradient(90deg, #090d16, #140f2b); border: 2px solid #1f2937; 
+        border-left: 8px solid #00F0FF; padding: 20px; margin-bottom: 25px; border-radius: 12px;
+        animation: borderPulse 2.5s infinite ease-in-out;
     }
     
-    /* การ์ดผลลัพธ์แบบวิบวับขยับลอย */
+    /* การ์ดแสดงผลสไตล์กระจกนีออน วิบวับ ขยับลอย */
     .profile-card { 
-        background: linear-gradient(135deg, #111827 0%, #0f172a 100%); 
-        border: 1px solid #1f2937; padding: 25px; border-radius: 16px; margin-bottom: 25px;
-        animation: floatCard 5s infinite ease-in-out;
-        background-image: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.03) 50%, rgba(255,255,255,0) 100%);
-        background-size: 200% 100%; animation-name: floatCard, shimmers; animation-duration: 5s, 3s; animation-iteration-count: infinite;
+        background: linear-gradient(135deg, rgba(17, 24, 39, 0.9) 0%, rgba(15, 23, 42, 0.8) 100%); 
+        border: 1px solid rgba(56, 189, 248, 0.2); padding: 25px; border-radius: 18px; margin-bottom: 25px;
+        backdrop-filter: blur(10px);
+        background-image: linear-gradient(120deg, rgba(255,255,255,0) 30%, rgba(0,240,255,0.08) 50%, rgba(255,255,255,0) 70%);
+        background-size: 200% 100%; 
+        animation: floatCard 4s infinite ease-in-out, shimmers 3s linear infinite;
     }
     
     .face-active { 
-        border: 1px solid #059669; background: linear-gradient(90deg, #064E3B, #022c22); color: #34D399; 
-        padding: 12px; text-align: center; font-weight: bold; border-radius: 8px; 
-        margin-bottom: 20px; box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+        border: 1px solid #10B981; background: linear-gradient(90deg, #042f1a, #064E3B); color: #34D399; 
+        padding: 15px; text-align: center; font-weight: bold; border-radius: 10px; 
+        margin-bottom: 20px; box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+        animation: borderPulse 1.5s infinite ease-in-out;
     }
     
-    /* 🎯 สั่งบีบกล่องข้อความทุุกอันใน Streamlit ให้ขยับและเรืองแสงตอนเอาเมาส์ไปวาง/คลิก */
+    /* 💥 บังคับให้ช่องกรอกข้อมูล (Text Inputs) และกล่องทุกอันขยับเรืองแสงแบบ Active */
     .stTextInput div div input {
-        background-color: #0f172a !important; color: #00F0FF !important;
-        border: 1px solid #334155 !important; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+        background-color: #090d16 !important; color: #00F0FF !important;
+        border: 1px solid #1f2937 !important; border-radius: 8px !important;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
     }
     .stTextInput div div input:focus {
-        border-color: #00F0FF !important; box-shadow: 0 0 15px rgba(0, 240, 255, 0.5) !important;
-        transform: scale(1.005);
+        border-color: #00F0FF !important; box-shadow: 0 0 20px rgba(0, 240, 255, 0.6) !important;
+        transform: scale(1.01) translateY(-1px);
     }
     .stTextInput div div input:hover {
-        border-color: #38BDF8 !important;
+        border-color: #38BDF8 !important; background-color: #0f172a !important;
     }
     
-    /* 🎚️ ไอคอนบน Sidebar ให้ขยับสั่นเบาๆ */
-    .sidebar-icon { display: inline-block; animation: iconJiggle 0.5s infinite ease-in-out; }
+    /* แอนิเมชันไอคอนใน Sidebar ให้หมุนล้ำๆ */
+    .spin-icon { display: inline-block; animation: iconSpin 4s linear infinite; }
     
-    /* ⚡ ปรับแต่งปุ่มกดบิ๊กบอสให้เรืองแสงไหลเวียน */
+    /* ⚡ ปุ่มกดไฮเปอร์เอ็นจิ้นแบบ RGB Fluid ไหลเวียนระยิบระยับ */
     .stButton>button {
-        background: linear-gradient(90deg, #FF007F, #7000FF, #00F0FF) !important;
-        background-size: 200% auto !important; color: #FFFFFF !important; font-weight: bold !important; 
-        border: none !important; border-radius: 8px !important; padding: 15px !important; font-size: 16px !important;
-        box-shadow: 0 0 20px rgba(112, 0, 255, 0.5) !important; transition: all 0.4s ease !important;
-        animation: shimmers 2s linear infinite !important;
+        background: linear-gradient(-45deg, #FF007F, #7000FF, #00F0FF, #10B981) !important;
+        background-size: 400% 400% !important; color: #FFFFFF !important; font-weight: bold !important; 
+        border: none !important; border-radius: 12px !important; padding: 18px !important; font-size: 18px !important; letter-spacing: 2px;
+        box-shadow: 0 0 25px rgba(112, 0, 255, 0.6) !important; transition: all 0.4s ease !important;
+        animation: fluidRGB 3s ease infinite !important;
     }
     .stButton>button:hover {
-        transform: scale(1.01) translateY(-2px) !important;
-        box-shadow: 0 0 35px rgba(0, 240, 255, 0.9) !important;
+        transform: scale(1.015) translateY(-3px) !important;
+        box-shadow: 0 0 40px rgba(0, 240, 255, 1) !important;
     }
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown("<div class='terminal-header'>🛸 NEXUS-OSINT // HYPER-ANIMATED MATRIX v4</div>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #38BDF8; font-size: 13px; animation: textFlicker 4s infinite;'>[ STATUS: MAXIMUM RESOURCE OVERCLOCKING // ALL INTERFACES ANIMATED ]</p><br>", unsafe_allow_html=True)
+st.markdown("<div class='terminal-header'>🛸 NEXUS-OSINT // CORE OVERCLOCK-MATRIX v5</div>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #38BDF8; font-size: 13px; animation: textFlicker 3s infinite;'>[ STATUS: ALL INTERFACES HYPER-ANIMATED // RESOURCE FLOW 100% ]</p><br>", unsafe_allow_html=True)
 
 # 2. แผงควบคุมคีย์การเข้าถึง (Sidebar Config)
 with st.sidebar:
-    st.markdown("<h3 style='color: #00F0FF; font-family: monospace;'>⚡ <span class='sidebar-icon'>🎛️</span> SYSTEMS CONTROL</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #00F0FF; font-family: monospace;'>⚡ <span class='spin-icon'>🎛️</span> SYSTEMS CONTROL</h3>", unsafe_allow_html=True)
     pdl_key = st.text_input("🧬 PEOPLE DATA LABS KEY:", type="password")
     socialcrawl_key = st.text_input("🧬 SOCIALCRAWL API KEY:", type="password")
     coresignal_key = st.text_input("🧬 CORESIGNAL KEY:", type="password")
     
     st.markdown("---")
-    st.markdown("<h3 style='color: #FFB700; font-family: monospace;'>🔮 <span class='sidebar-icon'>📷</span> FACIAL NODE</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #FFB700; font-family: monospace;'>🔮 📷 FACIAL DATA NODE</h3>", unsafe_allow_html=True)
     facecheck_key = st.text_input("🛰️ 1. FaceCheck.ID API KEY:", type="password", placeholder="Paste Token here")
     
     st.markdown("<br>", unsafe_allow_html=True)
     enable_yandex = st.toggle("🌌 Activate Yandex Auto-Scraper Node", value=True)
 
-# 3. ฟอร์มป้อนข้อมูลหลัก
-st.markdown("<div class='system-status'>🛸 <b>[TARGET MATRIX PROFILE]</b> ระบบแตกคีย์เวิร์ดสลับโครงสร้างภาษาอัตโนมัติพร้อมวิเคราะห์การกะพริบของสัญญานข้อมูล</div>", unsafe_allow_html=True)
+# 3. ฟอร์มป้อนข้อมูลหลัก (จุดที่สั่งแก้ไขข้อความใหม่เรียบร้อยครับ!)
+st.markdown("<div class='system-status'>🛸 <b>[TARGET MATRIX PROFILE]</b> ระบบสืบหา แพปลา แร่นาง มาวินชอบชินบิ</div>", unsafe_allow_html=True)
 
 col_fn, col_ln = st.columns(2)
-with col_fn: first_name = st.text_input("🛸 ชื่อจริงเป้าหมาย (Firstname)", placeholder="เช่น จุฑามาศ หรือ Jutamas")
-with col_ln: last_name = st.text_input("💥 นามสกุลเป้าหมาย (Lastname)", placeholder="เช่น มาตรธะเล หรือ Matthale")
+with col_fn: first_name = st.text_input("🛸 ชื่อจริงเป้าหมาย (Firstname)", placeholder="กรอกชื่อจริงเพื่อเริ่มต้นแกะรอย")
+with col_ln: last_name = st.text_input("💥 นามสกุลเป้าหมาย (Lastname)", placeholder="กรอกนามสกุลเพื่อไขว้ตรรกะภาษา")
 
 # 📸 ระบบอัพโหลดภาพใบหน้าเป้าหมาย
 st.markdown("<h4 style='color: #00F0FF;'>📸 คลังโครงข่ายเศษซากใบหน้าดิจิทัล (Facial Stream Node)</h4>", unsafe_allow_html=True)
@@ -144,7 +152,7 @@ if uploaded_faces:
         st.markdown(f"<div class='face-active'>🔥 [MAX MEMORY CRAWL] ขับเคลื่อนขีดจำกัดหน่วยความจำเซิร์ฟเวอร์สแกนภาพถ่ายจำนวน {len(uploaded_faces)} ภาพพร้อมกันเต็มสูบ!</div>", unsafe_allow_html=True)
         face_status_log = "⚡ ADVANCED ONLINE: เอ็นจิ้นขุดคุ้ยภาพอัตลักษณ์ใบหน้าล็อคเป้าหมายสมบูรณ์"
 
-# 4. ข้อมูลเสริมสำหรับใช้ระบบรีเช็คความสอดคล้องเบื้องหลัง 11 ช่อง
+# 4. ข้อมูลเสริมสำหรับใช้ระบบรีเช็คความสอดคล้องเบื้องหลัง 11 ช่อง (มีไอคอนขยับเรืองแสงตามช่อง)
 st.markdown("<h4 style='color: #FFB700;'>🔎 ตารางป้อนข้อมูลหลักฐานแวดล้อมเพื่อคัดกรองความแม่นยำ (11 Nodes Verification)</h4>", unsafe_allow_html=True)
 c1_1, c1_2, c1_3 = st.columns(3)
 with c1_1: nickname = st.text_input("🏷️ ข้อมูลชื่อเล่น")
@@ -176,7 +184,7 @@ def fetch_facecheck_api(image_file, api_key):
     return None
 
 # 5. ตรรกะการรันคำสั่งสแกนเต็มกำลังสูงสุด (Maximum Thread Performance)
-if st.button("🛸 INITIALIZE MAXIMUM HYPER CRAWLER (ENGINES OVERLOAD)", type="primary", use_container_width=True):
+if st.button("🛸 INITIALIZE MAXIMUM HYPER CRAWLER (ALL ENGINES OVERLOAD)", type="primary", use_container_width=True):
     if not first_name and not uploaded_faces:
         st.warning("[-] กรุณาระบุข้อมูลชื่อ หรือ รูปภาพเพื่อส่งกระแสไฟฟ้ารันระบบ")
     else:
@@ -261,10 +269,10 @@ if st.button("🛸 INITIALIZE MAXIMUM HYPER CRAWLER (ENGINES OVERLOAD)", type="p
             st.markdown(f"""
             <div class='profile-card'>
                 <div style='display: flex; justify-content: space-between; align-items: center;'>
-                    <h4 style='color: #00F0FF; margin: 0; animation: textFlicker 6s infinite;'>👤 ตรวจพบฐานข้อมูลบุคคลชุดที่ {idx+1}: {p['name_found']}</h4>
-                    <span style='color: #10B981; font-weight: bold; font-size: 18px; text-shadow: 0 0 10px rgba(16,185,129,0.5);'>INTELLIGENCE MATCH: {final_score}%</span>
+                    <h4 style='color: #00F0FF; margin: 0; animation: textFlicker 5s infinite;'>👤 ตรวจพบฐานข้อมูลบุคคลชุดที่ {idx+1}: {p['name_found']}</h4>
+                    <span style='color: #10B981; font-weight: bold; font-size: 18px; text-shadow: 0 0 12px rgba(16,185,129,0.6);'>INTELLIGENCE MATCH: {final_score}%</span>
                 </div>
-                <p style='margin: 12px 0; font-size: 14px; color: #E2E8F0; line-height: 1.6;'>
+                <p style='margin: 14px 0; font-size: 14px; color: #E2E8F0; line-height: 1.6;'>
                     <b>📡 แหล่งที่มา (Node Source):</b> {p['source']}<br>
                     <b>🧬 บันทึกประวัติ (Bio Decrypted):</b> {p['bio']}
                 </p>
@@ -277,4 +285,4 @@ if st.button("🛸 INITIALIZE MAXIMUM HYPER CRAWLER (ENGINES OVERLOAD)", type="p
             st.link_button(f"🔗 ล็อกเป้าหมายและเจาะทะลุเข้าสู่หน้า Facebook จริงคนที่ {idx+1} ↗️", p['url'], use_container_width=True)
             st.write("")
 
-        st.success("🎯 ระบบอัปเดต UI ชนิดเรืองแสงเคลื่อนไหวเต็มระบบ (Cyber Overload Engine) เสร็จสิ้น หน้าจอพร้อมรันพลังสูงสุดแล้วครับ!")
+        st.success("🎯 ผลลัพธ์โอเวอร์คล็อกสมบูรณ์! ปรับแก้สโลแกนและใส่พลังแอนิเมชันเคลื่อนไหวแบบ Ultra-Reactive ทุกจุดเรียบร้อยครับ!")
