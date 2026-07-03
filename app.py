@@ -76,13 +76,13 @@ def ask_gemini_for_variants(first_name, last_name, api_key):
         คุณคือระบบผู้เชี่ยวชาญด้าน OSINT ระดับสูง จงวิเคราะห์ชื่อภาษาไทย: "{first_name}" และนามสกุล: "{last_name}"
         แล้วสร้างรายการ "ชื่อผู้ใช้ (Username)" หรือ "ชื่อโปรไฟล์" ภาษาอังกฤษที่คนคนนี้มีแนวโน้มจะนำไปใช้ตั้งบน Social Media มากที่สุด โดยจัดเรียงลำดับใน Array ตามระดับความง่ายไปยากดังนี้:
 
-        1. [ช่วงแรกสุด - ตรงตัวเป๊ะๆ ติดกัน]: แปลงชื่อและนามสกุลเป็นภาษาอังกฤษตรงตัว (รวมถึงการสะกดตรงตัวที่คนไทยนิยมใช้ได้ทุกรูปแบบ เช่น Araya, Alaiya) แล้วให้พิมพ์ติดกันเป็นพืดตัวเล็กทั้งหมด "ห้ามมีจุด ห้ามมีขีดล่าง ห้ามมีตัวเลขเด็ดขาด" (ตัวอย่างเช่น arayaburomsri, alaiyaburomsri) เอาออกมาให้ครบทุกแบบการสะกดตรงตัวเท่าที่จะเป็นไปได้
-        2. [ช่วงที่สอง - ตรงตัวคั่นสัญลักษณ์]: เริ่มเอาชื่อตรงตัวมาคั่นด้วยเครื่องหมายพื้นฐานจุดหรือขีดล่าง (เช่น araya.buromsri, araya_buromsri)
-        3. [ช่วงที่สาม - เริ่มย่อและผสมซับซ้อน]: นามสกุลเริ่มสั้นลงหรือย่อผสมกับเครื่องหมาย (เช่น araya.bur, araya._brs, arayab)
-        4. [ช่วงท้ายสุด - คาดเดาพฤติกรรม/ตัวเลข]: ใส่ชื่อเล่น, คำสร้อย, ปีเกิด ค.ศ. หรือ พ.ศ. (เช่น Benz.araya, araya2026, araya2569)
+        1. [ช่วงแรกสุด - ตรงตัวเป๊ะๆ ติดกัน]: แปลงชื่อและนามสกุลเป็นภาษาอังกฤษตรงตัว (รวมถึงการสะกดตรงตัวที่คนไทยนิยมใช้ได้ทุกรูปแบบ เช่น Lungrae, Phaepla) แล้วให้พิมพ์ติดกันเป็นพืดตัวเล็กทั้งหมด "ห้ามมีจุด ห้ามมีขีดล่าง ห้ามมีตัวเลขใดๆ แทรกในกลุ่มนี้เด็ดขาด" (ตัวอย่างเช่น lungraephaepla) เอาออกมาให้ครบทุกแบบการสะกดตรงตัวเท่าที่จะเป็นไปได้
+        2. [ช่วงที่สอง - ตรงตัวคั่นสัญลักษณ์]: เริ่มเอาชื่อตรงตัวมาคั่นด้วยเครื่องหมายพื้นฐานจุดหรือขีดล่าง (เช่น lungrae.phaepla, lungrae_phaepla)
+        3. [ช่วงที่สาม - เริ่มย่อและผสมซับซ้อน]: นามสกุลเริ่มสั้นลงหรือย่อผสมกับเครื่องหมายและตัวเลขพฤติกรรม (เช่น lungrae.p, lungrae._pp49, lungrae_p49)
+        4. [ช่วงท้ายสุด - คาดเดาพฤติกรรมอื่นๆ]: ใส่ชื่อเล่น, คำสร้อย, หรือปีเกิดผสม (เช่น lungrae2026, lungrae2569)
 
         จงตอบกลับเป็นรูปแบบ JSON array ของข้อความเท่านั้น ห้ามมีคำอธิบายหรือเครื่องหมายมาร์กดาวน์ใดๆ ทั้งสิ้น ตัวอย่างโครงสร้างผลลัพธ์:
-        ["arayaburomsri", "araya.buromsri", "araya._brs", "araya2026"]
+        ["lungraephaepla", "lungrae.phaepla", "lungrae._pp49", "lungrae2026"]
         """
         
         response = model.generate_content(prompt)
@@ -107,14 +107,14 @@ def ask_gemini_for_variants(first_name, last_name, api_key):
         st.error(f"[-] SYSTEM ERROR ACCESSING GEMINI NODE: {str(e)}")
         return []
 
-# ฟอร์มรับข้อมูลเป้าหมาย
+# ฟอร์มรับข้อมูลเป้าหมาย (อัปเดตตัวอย่างเป็น ลุงแร่ แพปลา49 เรียบร้อยครับ)
 st.markdown("<div class='system-status'>[SYSTEM] READY TO INTEL: กรอกข้อมูลเป้าหมายคนไทยเพื่อส่งให้ AI คำนวณรอยเท้าดิจิทัล</div>", unsafe_allow_html=True)
 
 col1, col2 = st.columns(2)
 with col1:
-    first_name = st.text_input("TARGET FIRST NAME (ภาษาไทย)", placeholder="เช่น อารยา")
+    first_name = st.text_input("TARGET FIRST NAME (ภาษาไทย)", value="ลุงแร่", placeholder="เช่น ลุงแร่")
 with col2:
-    last_name = st.text_input("TARGET LAST NAME (ภาษาไทย)", placeholder="เช่น บุรมย์ศรี")
+    last_name = st.text_input("TARGET LAST NAME (ภาษาไทย)", value="แพปลา49", placeholder="เช่น แพปลา49")
 
 # ปุ่มกดรันระบบ
 if st.button("⚡ INITIALIZE DEEP SCAN (วิเคราะห์โครงสร้างชื่อด้วย AI)", type="primary", use_container_width=True):
@@ -170,4 +170,4 @@ if st.button("⚡ INITIALIZE DEEP SCAN (วิเคราะห์โครง�
                 
                 st.markdown("<hr style='border-color: #1F2937; margin: 15px 0;'>", unsafe_allow_html=True)
 
-            st.success("🎯 [COMPLETED] คัดกรองและเรียงลำดับรอยเท้าดิจิทัลจากตรงตัวเป๊ะไปยากเสร็จสมบูรณ์!")
+            st.success("🎯 [COMPLETED] คัดกรองและเรียงลำดับรอยเท้าดิจิทัลตามเป้าหมายชุดใหม่เสร็จสิ้น!")
