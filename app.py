@@ -44,11 +44,11 @@ with col_fn:
 with col_ln:
     last_name = st.text_input("นามสกุล", placeholder="เช่น มาตรธะเล หรือ Matthale")
 
-# --- 📸 [MODULE] ระบบอัพโหลดภาพใบหน้าเป้าหมาย (แทรกระบบอัพโหลดแบบชุดใหญ่ 600 ภาพ / 2GB เรียบร้อย) ---
+# --- 📸 [MODULE] ระบบอัพโหลดภาพใบหน้าเป้าหมาย (ปรับปรุงเหลือสูงสุด 20 ภาพ / ขนาดรวมไม่เกิน 1GB) ---
 st.markdown("<h4 style='color: #00F0FF;'>📸 ระบบวิเคราะห์และสืบค้นจากภาพใบหน้า (Facial OSINT Integration) - Optional</h4>", unsafe_allow_html=True)
 
 uploaded_faces = st.file_uploader(
-    "ลากไฟล์รูปภาพใบหน้าเป้าหมายมาวางที่นี่ (รองรับสูงสุด 600 ภาพ ขนาดรวมไม่เกิน 2GB)", 
+    "ลากไฟล์รูปภาพใบหน้าเป้าหมายมาวางที่นี่ (รองรับสูงสุด 20 ภาพ ขนาดรวมไม่เกิน 1GB)", 
     type=["jpg", "jpeg", "png"], 
     accept_multiple_files=True
 )
@@ -58,8 +58,8 @@ face_status_log = "ไม่ได้เปิดใช้บริการส�
 
 if uploaded_faces:
     total_files = len(uploaded_faces)
-    if total_files > 600:
-        st.error(f"❌ อัพโหลดเกินจำนวนที่กำหนด: ระบบรองรับสูงสุด 600 ภาพ (ปัจจุบันคุณอัพโหลด {total_files} ภาพ)")
+    if total_files > 20:
+        st.error(f"❌ อัพโหลดเกินจำนวนที่กำหนด: ระบบรองรับสูงสุด 20 ภาพ (ปัจจุบันคุณอัพโหลด {total_files} ภาพ)")
     else:
         st.markdown(f"<div class='face-active'>⚙️ [SYSTEM STATUS] FACIAL MATCH ENGINE ACTIVATED: ตรวจพบไฟล์ภาพจำนวน {total_files} ภาพ เตรียมพร้อมส่งประมวลผลคู่ขนาน</div>", unsafe_allow_html=True)
         st.image(uploaded_faces[0], caption=f"ตัวอย่างรูปภาพใบหน้าที่ 1 จากทั้งหมด {total_files} ภาพ", width=150)
@@ -80,7 +80,7 @@ with c1_2: edu_elementary = st.text_input("จบจากประถมรร.
 with c1_3: edu_highschool = st.text_input("จบจากมัธยมรร.อะไร")
 
 c2_1, c2_2, c2_3, c2_4 = st.columns(4)
-with c2_1: studying_uni = st.text_input("เรียนอยู่มหาลัยอะไร")
+with c2_1: studying_uni = st.text_input("เรียนอยู่มхаลัยอะไร")
 with c2_2: graduated_uni = st.text_input("จบจากมหาลัยอะไร")
 with c2_3: studying_faculty = st.text_input("กำลังเรียนคณะอะไร")
 with c2_4: graduated_faculty = st.text_input("จบจากคณะอะไร")
