@@ -22,16 +22,16 @@ with st.sidebar:
     catfish_key = st.text_input("2. SOCIAL CATFISH KEY:", type="password")
     coresignal_key = st.text_input("3. CORESIGNAL KEY:", type="password")
 
-# 3. ฟอร์มกรอกข้อมูลหลัก
+# 3. ฟอร์มกรอกข้อมูลหลัก (แก้ไขเอาค่าเริ่มต้นออก เป็นช่องว่างแล้วครับ)
 st.markdown("<div class='system-status'>[SYSTEM] MULTI-NODE LIVE FETCH</div>", unsafe_allow_html=True)
 
 col1, col2 = st.columns(2)
 with col1:
-    first_name = st.text_input("ชื่อจริง (ภาษาอังกฤษจะแม่นยำที่สุดสำหรับ API สากล)", value="Araya")
+    first_name = st.text_input("ชื่อจริง (ภาษาอังกฤษจะแม่นยำที่สุดสำหรับ API สากล)", placeholder="เช่น Araya")
 with col2:
-    last_name = st.text_input("นามสกุล (ภาษาอังกฤษ)", value="Buromsri")
+    last_name = st.text_input("นามสกุล (ภาษาอังกฤษ)", placeholder="เช่น Buromsri")
 
-# 4. ฟอร์มข้อมูลเสริมตรวจสอบความสอดคล้อง (แก้ไขแยก 11 ช่องตามสั่ง)
+# 4. ฟอร์มข้อมูลเสริมตรวจสอบความสอดคล้อง (11 ช่องอิสระ)
 st.markdown("<h4 style='color: #FFB700;'>🔍 ข้อมูลเสริมตรวจสอบความสอดคล้อง (Optional)</h4>", unsafe_allow_html=True)
 
 # แถวที่ 1: ข้อมูลทั่วไปและโรงเรียน
@@ -48,7 +48,7 @@ c2_1, c2_2, c2_3, c2_4 = st.columns(4)
 with c2_1:
     studying_uni = st.text_input("เรียนอยู่มหาลัยอะไร", placeholder="เช่น จุฬาลงกรณ์มหาวิทยาลัย")
 with c2_2:
-    graduated_uni = st.text_input("จบจากมหาลัยอะไร", placeholder="เช่น มหาวิทยาลัยเชียงใหม่")
+    graduated_uni = st.text_input("จบจากหาลัยอะไร", placeholder="เช่น มหาวิทยาลัยเชียงใหม่")
 with c2_3:
     studying_faculty = st.text_input("กำลังเรียนมหาลัยคณะอะไร", placeholder="เช่น คณะวิศวกรรมศาสตร์")
 with c2_4:
@@ -104,7 +104,7 @@ if st.button("⚡ INITIALIZE LIVE 3-NODE SCAN", type="primary", use_container_wi
                     if core_res.status_code == 200: coresignal_data = core_res.json()
                 except: pass
 
-            # --- ตรรกะคำนวณ % ความแม่นยำเวอร์ชันปรับปรุงตาม 11 เงื่อนไขใหม่ ---
+            # --- ตรรกะคำนวณ % ความแม่นยำตาม 11 เงื่อนไข ---
             match_rate = 40
             evidence_count = 0
             
@@ -119,7 +119,7 @@ if st.button("⚡ INITIALIZE LIVE 3-NODE SCAN", type="primary", use_container_wi
             if coresignal_data:
                 coresignal_status = "🟢 FOUND"; match_rate += 15; evidence_count += 1
 
-            # เก็บคะแนนจาก 11 ช่องตัวเลือกเสริม (ถ้ากรอกข้อมูลส่งผลให้น้ำหนักความแม่นยำเพิ่มขึ้น)
+            # เก็บคะแนนจาก 11 ช่องตัวเลือกเสริม
             bonus_score = 0
             if nickname: bonus_score += 3
             if edu_elementary: bonus_score += 5
