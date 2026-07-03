@@ -1,3 +1,4 @@
+import streamlit as st
 import urllib.parse
 import requests
 import time
@@ -90,7 +91,7 @@ with c1_2: edu_elementary = st.text_input("จบจากประถมรร.
 with c1_3: edu_highschool = st.text_input("จบจากมัธยมรร.อะไร")
 
 c2_1, c2_2, c2_3, c2_4 = st.columns(4)
-with c2_1: studying_uni = st.text_input("เรียนอยู่มхаลัยอะไร")
+with c2_1: studying_uni = st.text_input("เรียนอยู่มหาลัยอะไร")
 with c2_2: graduated_uni = st.text_input("จบจากมหาลัยอะไร")
 with c2_3: studying_faculty = st.text_input("กำลังเรียนคณะอะไร")
 with c2_4: graduated_faculty = st.text_input("จบจากคณะอะไร")
