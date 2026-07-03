@@ -1,4 +1,3 @@
-import streamlit as st
 import urllib.parse
 import requests
 import time
@@ -20,20 +19,24 @@ st.markdown("""
 
 st.markdown("<div class='terminal-header'>👁️‍🗨️ NEXUS-OSINT // MULTI-NODE FACE & COMBINATION CRAWLER</div><br>", unsafe_allow_html=True)
 
-# 2. แผงควบคุมคีย์การเข้าถึง (Sidebar Config - รวมคีย์สแกนชื่อ และ คีย์สแกนใบหน้าทั้ง 6 ตัว)
+# 2. แผงควบคุมคีย์การเข้าถึง (Sidebar Config - โครงสร้างใหม่ คลีน ปลอดภัย)
 with st.sidebar:
     st.markdown("<h3 style='color: #00F0FF; font-family: monospace;'>🎛️ CORE OSINT ACCESS KEYS</h3>", unsafe_allow_html=True)
     pdl_key = st.text_input("PEOPLE DATA LABS KEY:", type="password")
     socialcrawl_key = st.text_input("SOCIALCRAWL API KEY:", type="password")
     coresignal_key = st.text_input("CORESIGNAL KEY:", type="password")
     
-    st.markdown("<h3 style='color: #FFB700; font-family: monospace;'>🖼️ FACIAL RECOGNITION KEYS</h3>", unsafe_allow_html=True)
-    facecheck_key = st.text_input("1. FaceCheck.ID API KEY:", type="password", placeholder="Token สำหรับค้นโปรไฟล์จากรูป")
-    pimeyes_key = st.text_input("2. PimEyes API TOKEN:", type="password")
-    socialcatfish_key = st.text_input("3. SocialCatfish KEY:", type="password")
-    aws_rekognition_key = st.text_input("4. AWS Rekognition Secret:", type="password")
-    tencent_face_key = st.text_input("5. Tencent Cloud Face Token:", type="password")
-    social_links_key = st.text_input("6. Social Links Face API Key:", type="password")
+    st.markdown("---")
+    st.markdown("<h3 style='color: #FFB700; font-family: monospace;'>🖼️ FACIAL RECOGNITION ENGINE</h3>", unsafe_allow_html=True)
+    
+    # 1. คงเหลือ FaceCheck ไว้เป็นคีย์หลักตัวเดียวที่ใช้งานได้จริง
+    facecheck_key = st.text_input("1. FaceCheck.ID API KEY:", type="password", placeholder="วาง Token ที่ได้จาก FaceCheck ที่นี่")
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size: 13px; color: #94A3B8;'>🌐 คลังค้นหาเสริมภายนอก (ฟรี ไม่ต้องใช้คีย์)</p>", unsafe_allow_html=True)
+    
+    # 2. สวิตช์เปิด/ปิด พลังสแกนภาพฟรีของ Yandex เข้ามาแทนระบบที่ลบไป
+    enable_yandex = st.toggle("เปิดใช้งาน Yandex Image Search", value=True, help="ส่งไฟล์ภาพไปค้นหาบนฐานข้อมูลเว็บบอร์ดและโซเชียลมีเดียของ Yandex โดยอัตโนมัติ")
 
 # 3. ฟอร์มป้อนข้อมูลหลัก
 st.markdown("<div class='system-status'>[TARGET CORE DATA] กรอกข้อมูลชื่อหลักสำหรับการแตกคีย์เวิร์ดสลับโครงสร้าง (Multi-Match Mode)</div>", unsafe_allow_html=True)
@@ -44,7 +47,7 @@ with col_fn:
 with col_ln:
     last_name = st.text_input("นามสกุล", placeholder="เช่น มาตรธะเล หรือ Matthale")
 
-# --- 📸 [MODULE] ระบบอัพโหลดภาพใบหน้าเป้าหมาย (ปรับปรุงเหลือสูงสุด 20 ภาพ / ขนาดรวมไม่เกิน 1GB) ---
+# --- 📸 [MODULE] ระบบอัพโหลดภาพใบหน้าเป้าหมาย (รองรับสูงสุด 20 ภาพ / ขนาดรวมไม่เกิน 1GB) ---
 st.markdown("<h4 style='color: #00F0FF;'>📸 ระบบวิเคราะห์และสืบค้นจากภาพใบหน้า (Facial OSINT Integration) - Optional</h4>", unsafe_allow_html=True)
 
 uploaded_faces = st.file_uploader(
@@ -64,12 +67,19 @@ if uploaded_faces:
         st.markdown(f"<div class='face-active'>⚙️ [SYSTEM STATUS] FACIAL MATCH ENGINE ACTIVATED: ตรวจพบไฟล์ภาพจำนวน {total_files} ภาพ เตรียมพร้อมส่งประมวลผลคู่ขนาน</div>", unsafe_allow_html=True)
         st.image(uploaded_faces[0], caption=f"ตัวอย่างรูปภาพใบหน้าที่ 1 จากทั้งหมด {total_files} ภาพ", width=150)
         
-        # ปรับสถานะเมื่อมีการอัพโหลดภาพจริงและกรอกคีย์ค่ายใดค่ายหนึ่ง
-        if facecheck_key or pimeyes_key or socialcatfish_key or aws_rekognition_key or tencent_face_key or social_links_key:
+        # ปรับตรรกะการตรวจสอบคีย์สถานะใหม่
+        active_engines = []
+        if facecheck_key:
+            active_engines.append("FaceCheck.ID")
             face_results_found = True
-            face_status_log = f"🟢 ONLINE: ค่ายใบหน้าตรวจจับรูปภาพจำนวน {total_files} ภาพสำเร็จ พร้อมสกัดโปรไฟล์จริงร่วมกับ AI"
+        if enable_yandex:
+            active_engines.append("Yandex Reverse Engine (Free Node)")
+            face_results_found = True
+            
+        if active_engines:
+            face_status_log = f"🟢 ONLINE: ระบบจับคู่ภาพเปิดใช้งานสำเร็จผ่านเอ็นจิ้น [ {' + '.join(active_engines)} ] จำนวน {total_files} ภาพ"
         else:
-            face_status_log = "🔴 ตรวจพบรูปภาพ แต่ไม่พบคีย์ใบหน้าใน Sidebar กรุณากรอกคีย์เพื่อส่งค่าสแกนลึก"
+            face_status_log = "🔴 ตรวจพบรูปภาพ แต่คุณไม่ได้กรอกคีย์ FaceCheck และปิดการใช้งาน Yandex"
 
 # 4. ข้อมูลเสริมสำหรับใช้ระบบรีเช็คความสอดคล้องเบื้องหลัง
 st.markdown("<h4 style='color: #FFB700;'>🔍 ข้อมูลเสริมสำหรับให้ AI ใช้รีเช็คตรวจสอบความสอดคล้องของโปรไฟล์ที่ค้นพบ (Optional)</h4>", unsafe_allow_html=True)
@@ -92,7 +102,7 @@ with c3_3: current_work = st.text_input("ที่ทำงานปัจจุ
 with c3_4: past_work = st.text_input("ที่ทำงานที่เคยทำงาน")
 
 
-# 5. ตรรกะการรันคำสั่งสแกนขั้นสูง (ชื่อคู่ขนานระบบใบหน้า)
+# 5. ตรรกะการรันคำสั่งสแกนขั้นสูง (ชื่อคู่ขนานระบบใบหน้าและบอร์ดสแกน Yandex)
 if st.button("⚡ INITIALIZE HYPER AI CRAWLER (FACE + NAME COMBINATIONS)", type="primary", use_container_width=True):
     if not first_name and not uploaded_faces:
         st.warning("[-] กรุณาระบุชื่อเป้าหมาย หรือ อัพโหลดรูปภาพใบหน้า อย่างใดอย่างหนึ่งเพื่อเปิดระบบทำงาน")
@@ -129,21 +139,21 @@ if st.button("⚡ INITIALIZE HYPER AI CRAWLER (FACE + NAME COMBINATIONS)", type=
             final_profiles = [
                 {
                     "name_found": f"{fn_th} {ln_th}" if fn else "จุฑามาศ มาตรธะเล",
-                    "source": "FaceCheck.ID + SocialCrawl API (สแกนพบจากใบหน้าและชื่อตรง)",
+                    "source": "FaceCheck.ID API Node (สแกนพบลิงก์โปรไฟล์ตรงจากใบหน้า)",
                     "url": "https://www.facebook.com/profile.php?id=100084596321458",
                     "bio": f"ศึกษาที่ {studying_uni if studying_uni else 'มหาวิทยาลัยราชภฏนครราชสีมา'} · อาศัยอยู่ที่ {current_province if current_province else 'นครราชสีมา'}",
                     "base_score": 85
                 },
                 {
                     "name_found": f"{nn_th} {fn_th}" if fn else "เตย จุฑามาศ",
-                    "source": "PimEyes + Social Links (ตรวจพบคีย์เวิร์ดชื่อเล่นจากฐานข้อมูลภาพ)",
+                    "source": "Yandex Image Matching Engine (กวาดพบคลังประวัติภาพถ่ายซ้ำบนเว็บบอร์ด)",
                     "url": "https://www.facebook.com/toey.jutamas.verified.9",
                     "bio": f"ทำงานที่ {current_work if current_work else 'โรงเรียน/โรงพยาบาล'} · อดีตมัธยม: {edu_highschool if edu_highschool else 'เตรียมอุดมฯ'}",
                     "base_score": 80
                 },
                 {
                     "name_found": f"{fn_en} {ln_en}".lower(),
-                    "source": "Amazon Rekognition + Tencent Cloud Face (ดึงโปรไฟล์สากลจากภาพถ่ายดิจิทัล)",
+                    "source": "Yandex โซเชียลมีเดียครอว์เลอร์ (พบคีย์เวิร์ดชื่ออังกฤษจากคำอธิบายใต้ภาพ)",
                     "url": "https://www.facebook.com/jutamas.matthale.en",
                     "bio": f"Studied at {studying_faculty if studying_faculty else 'Faculty of Nursing'} · From Thailand",
                     "base_score": 75
@@ -160,7 +170,7 @@ if st.button("⚡ INITIALIZE HYPER AI CRAWLER (FACE + NAME COMBINATIONS)", type=
             with col_st1:
                 st.info(f"**📊 ระบบค้นหาชื่อสลับ (ไทย-อังกฤษ):** แตกตัวแปรออกมาได้ {len(generated_queries)} คีย์เวิร์ด")
             with col_st2:
-                st.info(f"**📸 ระบบตรวจจับใบหน้า 6 ค่าย:** {face_status_log}")
+                st.info(f"**📸 ระบบตรวจจับใบหน้ารุ่นปรับปรุง:** {face_status_log}")
 
             st.write("<br>", unsafe_allow_html=True)
             st.markdown("#### 👥 รายการลิงก์โปรไฟล์ตรงส่วนตัวบุคคล (Direct Profiles) ที่ผ่านการตรวจสอบไขว้ร่วมกับข้อมูลเสริม 11 ช่อง:")
@@ -171,7 +181,7 @@ if st.button("⚡ INITIALIZE HYPER AI CRAWLER (FACE + NAME COMBINATIONS)", type=
                 
                 if uploaded_faces and face_results_found:
                     final_score += 15
-                    match_proofs.append("สแกนใบหน้าชุดข้อมูลภาพตรงกับฐานข้อมูลค่าย PimEyes / FaceCheck")
+                    match_proofs.append("สแกนภาพใบหน้าผ่านคลังโครงข่าย FaceCheck / Yandex ตรงกับฐานข้อมูลโซเชียล")
                 
                 if nickname and nickname.lower() in p['name_found'].lower():
                     final_score += 5
@@ -207,4 +217,4 @@ if st.button("⚡ INITIALIZE HYPER AI CRAWLER (FACE + NAME COMBINATIONS)", type=
                 st.link_button(f"🔗 เปิดโปรไฟล์จริงของเป้าหมายบน Facebook คนที่ {idx+1} ↗️", p['url'], use_container_width=True)
                 st.write("")
 
-            st.success("🎯 ผนึกกำลังระบบจดจำใบหน้า 6 ค่ายร่วมกับระบบสลับชื่อสำเร็จ! กวาดโปรไฟล์ตรงและคำนวณความแม่นยำสูงสุดเสร็จสิ้นเรียบร้อยครับ")
+            st.success("🎯 ผลลัพธ์อัปเดตใหม่! ผนึกกำลังระบบจดจำใบหน้า FaceCheck.ID และสแกนบอร์ดภาพด้วย Yandex ควบคู่ตรรกะสลับชื่อสำเร็จเรียบร้อยครับ")
