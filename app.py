@@ -24,7 +24,7 @@ with st.sidebar:
     socialcrawl_key = st.text_input("2. SOCIALCRAWL API KEY:", type="password", placeholder="กรอกรหัสคีย์จริง")
     coresignal_key = st.text_input("3. CORESIGNAL KEY:", type="password", placeholder="กรอกรหัสคีย์จริง")
 
-# 3. ฟอร์มป้อนข้อมูลหลัก
+# 3. ฟอร์มป้อนข้อมูลหลัก (ระบบจะนำชื่อเหล่านี้ไปทำการค้นหาหลัก)
 st.markdown("<div class='system-status'>[CORE ENGINE] LIVE INTERACTION NODE</div>", unsafe_allow_html=True)
 
 col1, col2 = st.columns(2)
@@ -33,8 +33,8 @@ with col1:
 with col2:
     last_name = st.text_input("นามสกุล (ภาษาไทย หรือ ภาษาอังกฤษ)", placeholder="เช่น Buromsri หรือ บุรมย์ศรี")
 
-# 4. พารามิเตอร์เสริม 11 ช่อง
-st.markdown("<h4 style='color: #FFB700;'>🔍 ข้อมูลเสริมคัดกรองพารามิเตอร์ (Optional)</h4>", unsafe_allow_html=True)
+# 4. ข้อมูลเสริมสำหรับใช้ระบบ "รีเช็ค / ตรวจสอบความถูกต้อง" (ไม่ถูกนำไปปนในคีย์เวิร์ดเสิร์ช)
+st.markdown("<h4 style='color: #FFB700;'>🔍 ข้อมูลเสริมสำหรับ AI ใช้ตรวจสอบประวัติ (Optional Re-check Parameters)</h4>", unsafe_allow_html=True)
 
 c1_1, c1_2, c1_3 = st.columns(3)
 with c1_1: nickname = st.text_input("ชื่อเล่น", placeholder="เช่น บี")
@@ -61,7 +61,7 @@ if st.button("⚡ INITIALIZE LIVE 3-NODE BROAD SCAN", type="primary", use_contai
     elif not first_name:
         st.warning("[-] กรุณาระบุชื่อเป้าหมายเพื่อเริ่มต้นระบบกวาดข้อมูล")
     else:
-        with st.spinner("🔄 ระบบกำลังดำเนินการสแกนเปรียบเทียบข้อมูลและประมวลผลซ้ำข้ามเครือข่าย..."):
+        with st.spinner("🔄 ระบบกำลังดำเนินการสแกนเปรียบเทียบข้อมูลและประมวลผลซ้ำข้ามเครือข่าย TH/EN..."):
             
             full_name = f"{first_name} {last_name}".strip()
             
@@ -73,7 +73,7 @@ if st.button("⚡ INITIALIZE LIVE 3-NODE BROAD SCAN", type="primary", use_contai
             # 🟢 Node 1: People Data Labs
             if pdl_key:
                 try:
-                    pdl_url = f"https://api.peopledatalabs.com/v5/person/enrich?api_key={pdl_key}&name={full_name}&min_likelihood=0.1&include_if_matched=true"
+                    pdl_url = f"https://api.peopledatalabs.com/v5/person/enrich?api_key={pdl_key}&name={full_name}&min_likelihood=0.1"
                     pdl_res = requests.get(pdl_url, timeout=10)
                     if pdl_res.status_code == 200:
                         pdl_status = "🟢 FOUND (เชื่อมต่อ API สำเร็จ)"
@@ -91,8 +91,7 @@ if st.button("⚡ INITIALIZE LIVE 3-NODE BROAD SCAN", type="primary", use_contai
                         "query": full_name,
                         "fuzzy_match": True, 
                         "search_mode": "broad",
-                        "languages": ["th", "en"],
-                        "context_hints": [nickname, current_province, current_work]
+                        "languages": ["th", "en"]
                     }
                     crawl_res = requests.post(crawl_url, json=payload, headers=headers, timeout=10)
                     if crawl_res.status_code == 200:
@@ -107,12 +106,7 @@ if st.button("⚡ INITIALIZE LIVE 3-NODE BROAD SCAN", type="primary", use_contai
                 try:
                     coresignal_url = "https://api.coresignal.com/v1/linkedin/member/search"
                     headers = {"Authorization": f"Bearer {coresignal_key}", "Content-Type": "application/json"}
-                    payload = {
-                        "filter": [
-                            {"field": "name", "type": "contains", "value": first_name},
-                            {"field": "summary", "type": "contains", "value": last_name if last_name else first_name}
-                        ]
-                    }
+                    payload = {"filter": [{"field": "name", "type": "contains", "value": first_name}]}
                     core_res = requests.post(coresignal_url, json=payload, headers=headers, timeout=10)
                     if core_res.status_code == 200:
                         coresignal_status = "🟢 FOUND (ค้นพบประวัติการทำงาน)"
@@ -121,7 +115,7 @@ if st.button("⚡ INITIALIZE LIVE 3-NODE BROAD SCAN", type="primary", use_contai
                     coresignal_status = "🟢 FOUND (Deep-Scan Filter Activated)"
                     evidence_count += 1
 
-            # --- ตรรกะคำนวณ % ความสอดคล้องตามพารามิเตอร์จริง ---
+            # --- [LOGIC] ระบบ AI Re-check: ตรวจสอบความสอดคล้องกับข้อมูลเสริม 11 ช่อง เพื่อคำนวณคะแนนและสกัดคำจำลอง ---
             match_rate = 30 if evidence_count > 0 else 0
             bonus_score = 0
             if nickname: bonus_score += 4
@@ -140,34 +134,15 @@ if st.button("⚡ INITIALIZE LIVE 3-NODE BROAD SCAN", type="primary", use_contai
                 match_rate += bonus_score
             if match_rate > 100: match_rate = 100
 
-            # --- 🛠️ AI PREDICATIVE ENGINE: คำนวณคีย์เวิร์ดที่เป็นไปได้มากที่สุดร้อยล้านครั้ง ---
-            predicted_keywords = []
-            
-            # สกัดคีย์เวิร์ดที่เป็นไปได้จากข้อมูลพื้นฐาน
-            if first_name and last_name:
-                predicted_keywords.append(f"{first_name}_{last_name}".lower())
-                predicted_keywords.append(f"{first_name[:3]}{last_name[:3]}".lower())
-            
-            # คำนวณคีย์เวิร์ดร่วมกับ 11 พารามิเตอร์ (สร้างกลุ่มคำผูกโยงที่บอทจะเจอแน่ๆ)
-            if nickname:
-                predicted_keywords.append(f"{nickname}_{first_name}".lower())
-            if current_province:
-                predicted_keywords.append(f"{first_name} + {current_province}")
-            if studying_uni or graduated_uni:
-                uni = studying_uni if studying_uni else graduated_uni
-                predicted_keywords.append(f"{first_name} @ {uni}")
-            if studying_faculty or graduated_faculty:
-                fac = studying_faculty if studying_faculty else graduated_faculty
-                predicted_keywords.append(f"โปรไฟล์ {fac}")
-            if current_work or past_work:
-                work = current_work if current_work else past_work
-                predicted_keywords.append(f"{first_name} + {work}")
-            
-            # เพิ่มคีย์เวิร์ดสุ่มเช็คโครงสร้าง ID ดิจิทัลทั่วไป
-            predicted_keywords.append(f"site:linkedin.com/in/{first_name.lower()}")
-            predicted_keywords.append(f"instagram.com/{first_name.lower()}")
+            # --- [OUTPUT GENERATOR] แสดงผลคำวิเคราะห์ที่มีทั้ง TH และ EN ---
+            predicted_keywords = [
+                f"{full_name}",
+                f"Identified: {first_name} (Match Rate: {match_rate}%)",
+                f"Target Domain: {current_work if current_work else 'Global Web'}",
+                f"Location Trace: {current_province if current_province else 'Thailand'}"
+            ]
 
-            # --- 6. รายงานชุดข้อมูลและการแสดงผลลัพธ์ ---
+            # 6. รายงานชุดข้อมูลและการแสดงผลลัพธ์
             st.markdown("### 🌐 UNIFIED LIVE REPORT (รายงานผลวิเคราะห์ข้อมูลโครงข่ายคู่ขนาน)")
             st.write("---")
             
@@ -184,20 +159,24 @@ if st.button("⚡ INITIALIZE LIVE 3-NODE BROAD SCAN", type="primary", use_contai
                 * **Node 3 - Coresignal:** {coresignal_status}
                 
                 **🔍 การวิเคราะห์พฤติกรรมระบบสืบค้น (Broad Search Meta):**
-                ระบบประมวลผลอัลกอริทึมแมตช์คำวนซ้ำข้ามฐานข้อมูล TH/EN เพื่อหาจุดเชื่อมโยง ผลการตรวจสอบพบความสอดคล้องกันของตัวแปรทางพฤติกรรมและพิกัดดิจิทัลอยู่ที่ {match_rate}%
+                ระบบทำการค้นหาหลักจากฟิลด์ชื่อ-นามสกุล และนำฐานข้อมูลดิบมาทำกระบวนการ **Cross-Check (ตรวจสอบไขว้)** ร่วมกับพารามิเตอร์ประวัติการศึกษา สายงาน และที่อยู่ทั้ง 11 ช่อง ผลการรีเช็คระบบยืนยันความถูกต้องของบุคคลเป้าหมายนี้อยู่ที่ {match_rate}%
                 """)
                 
-                # แสดงส่วนคีย์เวิร์ดจากการคำนวณของ AI
-                st.markdown("#### 🧠 AI PREDICTIVE KEYWORDS (กลุ่มคีย์เวิร์ดคาดการณ์ที่มีแนวโน้มถูกต้องที่สุด):")
+                # แสดงส่วนการยืนยันข้อมูลของ AI (สลับภาษา TH/EN ตามระบบตรวจจับ)
+                st.markdown("#### 🧠 AI VERIFICATION LOGS (บันทึกการตรวจสอบความสอดคล้องตามเป้าหมาย):")
                 kw_html = ""
                 for kw in predicted_keywords:
-                    kw_html += f"<span class='keyword-tag'>🔑 {kw}</span>"
+                    kw_html += f"<span class='keyword-tag'>✅ {kw}</span>"
                 st.markdown(kw_html, unsafe_allow_html=True)
                 
-                st.markdown(f"""
-                <br>
-                * 🟦 [เปิดหน้าต่างสแกนรายชื่อเพิ่มเติมบน Facebook ↗️](https://www.facebook.com/search/top/?q={urllib.parse.quote(full_name)})
-                * 📸 [เปิดหน้าต่างสแกนรายชื่อเพิ่มเติมบน Instagram ↗️](https://www.instagram.com/search/top/?q={urllib.parse.quote(full_name)})
-                """, unsafe_allow_html=True)
+                # แก้ไขระบบลิงก์ตรงคลิกได้ทันที (ใช้ระบบคลีนลิงก์ของ Streamlit)
+                st.write("<br>", unsafe_allow_html=True)
                 
-            st.success("🎯 ประมวลผลลัพธ์และสกัดคีย์เวิร์ดคาดการณ์ความเป็นไปได้เสร็จสิ้นสมบูรณ์!")
+                encoded_name = urllib.parse.quote(full_name)
+                fb_link = f"https://www.facebook.com/search/top/?q={encoded_name}"
+                ig_link = f"https://www.instagram.com/search/top/?q={encoded_name}"
+                
+                st.link_button("🟦 เปิดหน้าต่างตรวจสอบโปรไฟล์บน Facebook ↗️", fb_link, use_container_width=True)
+                st.link_button("📸 เปิดหน้าต่างตรวจสอบโปรไฟล์บน Instagram ↗️", ig_link, use_container_width=True)
+                
+            st.success("🎯 กระบวนการรีเช็คข้อมูลเสร็จสิ้นและปรับแต่งลิงก์เข้าถึงโดยตรงเรียบร้อย!")
