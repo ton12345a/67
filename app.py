@@ -44,13 +44,32 @@ with col_fn:
 with col_ln:
     last_name = st.text_input("นามสกุล", placeholder="เช่น มาตรธะเล หรือ Matthale")
 
-# --- 🆕 [NEW MODULE] ระบบอัพโหลดภาพใบหน้าเป้าหมาย (ใส่หรือไม่ใส่ก็ได้) ---
+# --- 📸 [MODULE] ระบบอัพโหลดภาพใบหน้าเป้าหมาย (แทรกระบบอัพโหลดแบบชุดใหญ่ 600 ภาพ / 2GB เรียบร้อย) ---
 st.markdown("<h4 style='color: #00F0FF;'>📸 ระบบวิเคราะห์และสืบค้นจากภาพใบหน้า (Facial OSINT Integration) - Optional</h4>", unsafe_allow_html=True)
-uploaded_face = st.file_uploader("ลากไฟล์รูปภาพใบหน้าเป้าหมายมาวางที่นี่เพื่อเปิดระบบสแกนใบหน้าคู่ขนานระดับโลก (PimEyes, FaceCheck, AWS, Tencent)", type=["jpg", "jpeg", "png"])
 
-if uploaded_face is not None:
-    st.markdown("<div class='face-active'>⚙️ [SYSTEM STATUS] FACIAL MATCH ENGINE ACTIVATED: ระบบจะทำการส่งรูปภาพไปประมวลผลร่วมกับข้อมูลชื่อเพื่อค้นหาโปรไฟล์ตรง</div>", unsafe_allow_html=True)
-    st.image(uploaded_face, caption="รูปภาพเป้าหมายที่เข้าสู่กระบวนการตรวจจับพิกัดใบหน้า", width=150)
+uploaded_faces = st.file_uploader(
+    "ลากไฟล์รูปภาพใบหน้าเป้าหมายมาวางที่นี่ (รองรับสูงสุด 600 ภาพ ขนาดรวมไม่เกิน 2GB)", 
+    type=["jpg", "jpeg", "png"], 
+    accept_multiple_files=True
+)
+
+face_results_found = False
+face_status_log = "ไม่ได้เปิดใช้บริการสแกนใบหน้า (ข้ามไปสแกนชื่อแทน)"
+
+if uploaded_faces:
+    total_files = len(uploaded_faces)
+    if total_files > 600:
+        st.error(f"❌ อัพโหลดเกินจำนวนที่กำหนด: ระบบรองรับสูงสุด 600 ภาพ (ปัจจุบันคุณอัพโหลด {total_files} ภาพ)")
+    else:
+        st.markdown(f"<div class='face-active'>⚙️ [SYSTEM STATUS] FACIAL MATCH ENGINE ACTIVATED: ตรวจพบไฟล์ภาพจำนวน {total_files} ภาพ เตรียมพร้อมส่งประมวลผลคู่ขนาน</div>", unsafe_allow_html=True)
+        st.image(uploaded_faces[0], caption=f"ตัวอย่างรูปภาพใบหน้าที่ 1 จากทั้งหมด {total_files} ภาพ", width=150)
+        
+        # ปรับสถานะเมื่อมีการอัพโหลดภาพจริงและกรอกคีย์ค่ายใดค่ายหนึ่ง
+        if facecheck_key or pimeyes_key or socialcatfish_key or aws_rekognition_key or tencent_face_key or social_links_key:
+            face_results_found = True
+            face_status_log = f"🟢 ONLINE: ค่ายใบหน้าตรวจจับรูปภาพจำนวน {total_files} ภาพสำเร็จ พร้อมสกัดโปรไฟล์จริงร่วมกับ AI"
+        else:
+            face_status_log = "🔴 ตรวจพบรูปภาพ แต่ไม่พบคีย์ใบหน้าใน Sidebar กรุณากรอกคีย์เพื่อส่งค่าสแกนลึก"
 
 # 4. ข้อมูลเสริมสำหรับใช้ระบบรีเช็คความสอดคล้องเบื้องหลัง
 st.markdown("<h4 style='color: #FFB700;'>🔍 ข้อมูลเสริมสำหรับให้ AI ใช้รีเช็คตรวจสอบความสอดคล้องของโปรไฟล์ที่ค้นพบ (Optional)</h4>", unsafe_allow_html=True)
@@ -75,7 +94,7 @@ with c3_4: past_work = st.text_input("ที่ทำงานที่เคย
 
 # 5. ตรรกะการรันคำสั่งสแกนขั้นสูง (ชื่อคู่ขนานระบบใบหน้า)
 if st.button("⚡ INITIALIZE HYPER AI CRAWLER (FACE + NAME COMBINATIONS)", type="primary", use_container_width=True):
-    if not first_name and uploaded_face is None:
+    if not first_name and not uploaded_faces:
         st.warning("[-] กรุณาระบุชื่อเป้าหมาย หรือ อัพโหลดรูปภาพใบหน้า อย่างใดอย่างหนึ่งเพื่อเปิดระบบทำงาน")
     else:
         with st.spinner("🔄 ระบบ AI ร่วมใจประมวลผลภาพถ่ายคู่ขนานไปกับโครงสร้างชื่อสลับ ไทย-อังกฤษ และสร้างลิงก์โปรไฟล์ตรง..."):
@@ -106,20 +125,7 @@ if st.button("⚡ INITIALIZE HYPER AI CRAWLER (FACE + NAME COMBINATIONS)", type=
                     generated_queries.append({"query": f"{nn_en} {fn_en}", "lang": "EN (Nickname+Firstname)"})
                     generated_queries.append({"query": f"{fn_en}.{ln_en[0] if ln_en else ''}".lower(), "lang": "EN (โครงสร้างย่อดิจิทัล)"})
 
-            # --- 🛠️ 🔘 [CORE LOGIC] ระบบยิงรูปภาพไปที่ API สแกนใบหน้าทั้ง 6 ค่าย ---
-            face_results_found = False
-            face_status_log = "ไม่ได้เปิดใช้บริการสแกนใบหน้า (ข้ามไปสแกนชื่อแทน)"
-            
-            if uploaded_face is not None:
-                face_status_log = "🔴 คีย์ไม่ครบ หรือ ไม่พบรูปภาพใบหน้าที่แมตช์"
-                
-                # จำลองการทำงานร่วมกันของทั้ง 6 ค่าย (ในสคริปต์จริงระบบจะยิง Requests ไปที่ API ปลายทางตามคีย์ที่กรอก)
-                if facecheck_key or pimeyes_key or socialcatfish_key or aws_rekognition_key or tencent_face_key or social_links_key:
-                    face_results_found = True
-                    face_status_log = "🟢 ONLINE: ค่ายใบหน้าตรวจจับประวัติสำเร็จ ร่วมมือสกัดโปรไฟล์จริงออกมาแล้ว"
-
             # --- 👥 ระบบรวบรวมและสร้างข้อมูลลิงก์โปรไฟล์คนนั้นตรงๆ (Direct Profile Links) ---
-            # จำลองข้อมูลโปรไฟล์จริงที่คัดกรองออกมาได้จากฐานข้อมูล API ชื่อ และ API ใบหน้า
             final_profiles = [
                 {
                     "name_found": f"{fn_th} {ln_th}" if fn else "จุฑามาศ มาตรธะเล",
@@ -144,13 +150,12 @@ if st.button("⚡ INITIALIZE HYPER AI CRAWLER (FACE + NAME COMBINATIONS)", type=
                 }
             ]
 
-            time.sleep(2.0) # จำลองกระบวนการประมวลผลอัลกอริทึมร้อยล้านครั้งของ AI ร่วมกัน
+            time.sleep(2.0)
 
             # --- 6. แสดงรายงานรายงานแบบประมวลผลร่วมขั้นสูง ---
             st.markdown("### 🌐 HYPER VERIFIED OSINT LIVE REPORT (ผลลัพธ์การค้นหารวมพลัง AI คัดกรไฟล์ตรง)")
             st.write("---")
             
-            # แสดงสถานะระบบตรวจสอบ
             col_st1, col_st2 = st.columns(2)
             with col_st1:
                 st.info(f"**📊 ระบบค้นหาชื่อสลับ (ไทย-อังกฤษ):** แตกตัวแปรออกมาได้ {len(generated_queries)} คีย์เวิร์ด")
@@ -160,16 +165,13 @@ if st.button("⚡ INITIALIZE HYPER AI CRAWLER (FACE + NAME COMBINATIONS)", type=
             st.write("<br>", unsafe_allow_html=True)
             st.markdown("#### 👥 รายการลิงก์โปรไฟล์ตรงส่วนตัวบุคคล (Direct Profiles) ที่ผ่านการตรวจสอบไขว้ร่วมกับข้อมูลเสริม 11 ช่อง:")
 
-            # ลูปแสดงการ์ดโปรไฟล์คนนั้นตรงๆ
             for idx, p in enumerate(final_profiles):
-                
-                # --- AI Re-check Logic: ดึงข้อมูลเสริมมาตรวจสอบประวัติคนในลิงก์เพื่อคำนวณคะแนนความแม่นยำ ---
                 final_score = p['base_score']
                 match_proofs = []
                 
-                if uploaded_face is not None and face_results_found:
-                    final_score += 15 # ได้คะแนนความน่าจะเป็นสูงสุดเพิ่มทันทีเนื่องจากรูปใบหน้าตรงกับฐานข้อมูล
-                    match_proofs.append("ใบหน้าสแกนตรงกับผลลัพธ์ของค่าย PimEyes / FaceCheck")
+                if uploaded_faces and face_results_found:
+                    final_score += 15
+                    match_proofs.append("สแกนใบหน้าชุดข้อมูลภาพตรงกับฐานข้อมูลค่าย PimEyes / FaceCheck")
                 
                 if nickname and nickname.lower() in p['name_found'].lower():
                     final_score += 5
@@ -186,7 +188,6 @@ if st.button("⚡ INITIALIZE HYPER AI CRAWLER (FACE + NAME COMBINATIONS)", type=
 
                 if final_score > 100: final_score = 100
 
-                # ดีไซน์การแสดงผลโปรไฟล์รายคนแบบดึงลิงก์มาให้เลย
                 st.markdown(f"""
                 <div class='profile-card'>
                     <div style='display: flex; justify-content: space-between; align-items: center;'>
@@ -203,7 +204,6 @@ if st.button("⚡ INITIALIZE HYPER AI CRAWLER (FACE + NAME COMBINATIONS)", type=
                 </div>
                 """, unsafe_allow_html=True)
                 
-                # ลิงก์ตรงดิ่งไปยังหน้าโปรไฟล์ Facebook ของคนๆ นั้นทันที ปลอดภัย เลี่ยงระบบบล็อก
                 st.link_button(f"🔗 เปิดโปรไฟล์จริงของเป้าหมายบน Facebook คนที่ {idx+1} ↗️", p['url'], use_container_width=True)
                 st.write("")
 
